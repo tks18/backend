@@ -17,9 +17,7 @@ const author = require("../models/author");
 mongoose.connect(process.env.DBURL, {useNewUrlParser: true,  useUnifiedTopology: true, useCreateIndex: true})
 
 //Routes
-app.get('/api', (req, res) => {
-  res.send("This is a Backend for My Portfolio. Super")
-});
+app.use('/api', require('../routes/index'));
 
 const PORT = process.env.PORT || 3000;
 
