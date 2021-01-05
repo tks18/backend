@@ -6,6 +6,8 @@ router.get('/', (req, res) => {
   res.send("Super ")
 });
 
-router.use('/author', require(join(__dirname, "author", "index.js")));
+router.get('/author', (req, res) => {
+  res.send("Super ")
+});
 
 module.exports = router;
