@@ -17,7 +17,7 @@ const author = require("../models/author");
 mongoose.connect(process.env.DBURL, {useNewUrlParser: true,  useUnifiedTopology: true, useCreateIndex: true})
 
 //Routes
-app.get('/', (req, res) => {
+app.get('/api', (req, res) => {
   res.send("This is a Backend for My Portfolio. Super")
 });
 
