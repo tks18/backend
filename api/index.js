@@ -18,7 +18,7 @@ mongoose.connect(process.env.DBURL, {useNewUrlParser: true,  useUnifiedTopology:
 
 //Routes
 app.get('/', (req, res) => {
-  res.send("This is a Backend for My Portfolio")
+  res.send("This is a Backend for My Portfolio. Super")
 });
 
 const PORT = process.env.PORT || 3000;
