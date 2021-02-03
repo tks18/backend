@@ -13,8 +13,10 @@ app.use(bodyParser.json());
 app.use(cors());
 
 //Connect mongo
-const author = require('./models/author');
 mongoose.connect(process.env.DBURL, {
+  useUnifiedTopology: true,
+  bufferCommands: false,
+  bufferMaxEntries: 0,
   useNewUrlParser: true,
   useCreateIndex: true,
 });
