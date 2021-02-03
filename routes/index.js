@@ -1,21 +1,17 @@
 const express = require('express');
 const router = express.Router();
-const { join } = require('path');
-const { db, closeConnection } = require('../helpers/mongo');
+const path = require('path');
+const db = require('../helpers/mongo');
 
-router.get('/', (req, res) => {
-  connection = db();
-  connection
-    .then((result) => {
-      res.send('This is a Backend for My Portfolio. Super');
+router.get(/(\/.*)+/, (req, res) => {
+  db.connect()
+    .then(() => {
+      res.status(403).sendFile(path.resolve(__dirname, '../views/index.html'));
     })
     .catch((err) => {
-      res.send(failed);
+      res.send(err);
     });
-  console.log('Finished');
-  closeConnection();
+  db.close();
 });
-
-router.use('/author', require('./author'));
 
 module.exports = router;
