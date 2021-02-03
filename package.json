@@ -4,8 +4,8 @@
   "description": "Backend Server for My Main Portfolio Website.",
   "main": "api/app.js",
   "scripts": {
-    "start": "set NODE_ENV=production && node api/index.js",
-    "dev": "set NODE_ENV=development && nodemon api/index.js",
+    "start": "set NODE_ENV=production && node index.js",
+    "dev": "set NODE_ENV=development && nodemon index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
