@@ -16,7 +16,6 @@ app.use(cors());
 const author = require('./models/author');
 mongoose.connect(process.env.DBURL, {
   useNewUrlParser: true,
-  useUnifiedTopology: true,
   useCreateIndex: true,
 });
 
