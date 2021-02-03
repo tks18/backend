@@ -1,4 +1,4 @@
-const express = require('express');
+r: Updatconst express = require('express');
 const router = express.Router();
 const { join } = require('path');
 const { db, closeConnection } = require('../helpers/mongo');
@@ -16,6 +16,6 @@ router.get('/', (req, res) => {
   closeConnection();
 });
 
-router.get('/author', require('./author'));
+router.use('/author', require('./author'));
 
 module.exports = router;
