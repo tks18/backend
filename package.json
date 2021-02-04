@@ -1,6 +1,6 @@
 {
   "name": "portfolio-backend",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "description": "Backend Server for My Main Portfolio Website.",
   "main": "api/app.js",
   "scripts": {
@@ -22,7 +22,7 @@
   "bugs": {
     "url": "https://github.com/tks18/portfolio-backend/issues"
   },
-  "homepage": "https://github.com/tks18/portfolio-backend#readme",
+  "homepage": "https://api.shaaan.tk",
   "dependencies": {
     "axios": "^0.21.1",
     "body-parser": "^1.19.0",
