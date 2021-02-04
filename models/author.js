@@ -1,24 +1,27 @@
 const mongoose = require('mongoose');
 
 const authorSchema = {
-	name: {
+  name: {
     type: String,
-    required: true
+    required: true,
   },
-	email: {
+  email: {
     type: String,
     required: true,
     unique: true,
-    lowercase: true
+    lowercase: true,
   },
   github: {
     type: String,
     required: true,
     unique: true,
-    lowercase: true,
-  }
-}
+  },
+  password: {
+    type: String,
+    required: true,
+  },
+};
 
-const Author = mongoose.model("Author", authorSchema);
+const Author = mongoose.model('Author', authorSchema);
 
 module.exports = Author;
