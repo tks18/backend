@@ -2,8 +2,10 @@
   "name": "portfolio-backend",
   "version": "0.0.1",
   "description": "Backend Server for My Main Portfolio Website.",
-  "main": "index.js",
+  "main": "api/app.js",
   "scripts": {
+    "start": "set NODE_ENV=production && node index.js",
+    "dev": "set NODE_ENV=development && nodemon index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -20,5 +22,15 @@
   "bugs": {
     "url": "https://github.com/tks18/portfolio-backend/issues"
   },
-  "homepage": "https://github.com/tks18/portfolio-backend#readme"
+  "homepage": "https://github.com/tks18/portfolio-backend#readme",
+  "dependencies": {
+    "axios": "^0.21.1",
+    "body-parser": "^1.19.0",
+    "cors": "^2.8.5",
+    "dotenv": "^8.2.0",
+    "ejs": "^3.1.5",
+    "express": "^4.17.1",
+    "mongoose": "^5.11.10",
+    "nodemailer": "^6.4.17"
+  }
 }
