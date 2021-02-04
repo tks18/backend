@@ -4,14 +4,9 @@ const path = require('path');
 const db = require('../helpers/mongo');
 
 router.get(/(\/.*)+/, (req, res) => {
-  db.connect()
-    .then(() => {
-      res.status(403).sendFile(path.resolve(__dirname, '../views/index.html'));
-    })
-    .catch((err) => {
-      res.send(err);
-    });
-  db.close();
+  res.status(401).sendFile(path.resolve(__dirname, '../views/index.html'));
 });
+
+router.use('/blog', require('./blog'));
 
 module.exports = router;
