@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const originCheck = require('../../helpers/checkOrigin');
 const db = require('../../helpers/mongo');
+const jwtverify = require('../../helpers/jwtVerify');
 
 //model
 const Blog = require('../../models/blog');
@@ -51,11 +52,10 @@ router.post('/get', (req, res) => {
 
 router.post('/set', (req, res) => {
   if (originCheck(req.headers.origin)) {
-    let pass = req.body.pass;
-    if (pass && pass == process.env.POSTPASS) {
+    let token = req.headers.token;
+    if (jwtverify(token)) {
       db.connect()
         .then(() => {
-          console.log(req.body);
           let post = req.body.post;
           if (post) {
             let newBlogPost = new Blog(post);
@@ -97,8 +97,8 @@ router.post('/set', (req, res) => {
 
 router.post('/update', (req, res) => {
   if (originCheck(req.headers.origin)) {
-    let pass = req.body.pass;
-    if (pass && pass == process.env.POSTPASS) {
+    let token = req.headers.token;
+    if (jwtverify(token)) {
       db.connect()
         .then(() => {
           let origpost = req.body.post;
@@ -165,8 +165,8 @@ router.post('/update', (req, res) => {
 
 router.post('/delete', (req, res) => {
   if (originCheck(req.headers.origin)) {
-    let pass = req.body.pass;
-    if (pass && pass == process.env.POSTPASS) {
+    let token = req.headers.token;
+    if (jwtverify(token)) {
       db.connect()
         .then(() => {
           let id = req.body.id;

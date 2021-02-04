@@ -8,5 +8,6 @@ router.get(/(\/.*)+/, (req, res) => {
 });
 
 router.use('/blog', require('./blog'));
+router.use('/author', require('./author'));
 
 module.exports = router;
