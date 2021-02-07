@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const path = require('path');
-const originCheck = require('../../helpers/checkOrigin');
+const originCheck = require('../helpers/checkOrigin');
 const db = require('../helpers/mongo');
 
 router.use('/blog', require('./blog'));
