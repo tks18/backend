@@ -33,6 +33,7 @@ router.post('/set', (req, res) => {
                           message: 'Succesfully Added Author',
                           doc,
                         });
+                        db.close();
                       } else {
                         res.status(500).json({
                           success: false,
@@ -40,6 +41,7 @@ router.post('/set', (req, res) => {
                           message:
                             'Error While Saving the Document, Please Try Again Later',
                         });
+                        db.close();
                       }
                     });
                   } else {
@@ -47,6 +49,7 @@ router.post('/set', (req, res) => {
                       success: false,
                       message: 'Error While Generating Hash',
                     });
+                    db.close();
                   }
                 });
               } else {
@@ -54,6 +57,7 @@ router.post('/set', (req, res) => {
                   success: false,
                   message: 'User is Already There',
                 });
+                db.close();
               }
             });
           } else {
@@ -61,10 +65,12 @@ router.post('/set', (req, res) => {
               success: false,
               message: 'Enter a Proper Email Id.',
             });
+            db.close();
           }
         })
         .catch((error) => {
           res.status(500).json({ success: false, message: error });
+          db.close();
         });
     } else {
       res.status(401).json({
@@ -104,12 +110,14 @@ router.post('/sign', (req, res) => {
                             token,
                             author: auth,
                           });
+                          db.close();
                         } else {
                           res.status(500).json({
                             success: false,
                             error,
                             message: 'Generation of Web Token Failed',
                           });
+                          db.close();
                         }
                       },
                     );
@@ -119,6 +127,7 @@ router.post('/sign', (req, res) => {
                       error,
                       message: 'Enter the Password Correctly',
                     });
+                    db.close();
                   }
                 },
               );
@@ -128,6 +137,7 @@ router.post('/sign', (req, res) => {
                 error,
                 message: 'Unable to Find the Author with the Email',
               });
+              db.close();
             }
           });
         })
@@ -137,6 +147,7 @@ router.post('/sign', (req, res) => {
             message: 'Server Error',
             error,
           });
+          db.close();
         });
     } else {
       res.status(401).json({

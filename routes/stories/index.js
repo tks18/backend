@@ -28,10 +28,12 @@ router.post('/get', (req, res) => {
               error,
             });
           }
+          db.close();
         });
       })
       .catch((error) => {
         res.status(500).json({ success: false, message: error });
+        db.close();
       });
   } else {
     res.status(401).json({
@@ -65,12 +67,20 @@ router.post('/set', (req, res) => {
                   error,
                 });
               }
+              db.close();
             });
           } else {
+            res.status(404).json({
+              success: false,
+              message: 'Story Validation Failed',
+              error,
+            });
+            db.close();
           }
         })
         .catch((error) => {
           res.status(500).json({ success: false, message: error });
+          db.close();
         });
     } else {
       res.status(401).json({

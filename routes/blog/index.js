@@ -24,6 +24,7 @@ router.post('/get', (req, res) => {
                 error: error,
               });
             }
+            db.close();
           });
         } else {
           Blog.find({}, (error, posts) => {
@@ -36,11 +37,13 @@ router.post('/get', (req, res) => {
                 error: error,
               });
             }
+            db.close();
           });
         }
       })
       .catch((error) => {
         res.status(500).json({ success: false, message: error });
+        db.close();
       });
   } else {
     res.status(401).json({
@@ -70,16 +73,19 @@ router.post('/set', (req, res) => {
               } else {
                 res.status(500).json({ success: false, message: error });
               }
+              db.close();
             });
           } else {
             res.status(404).json({
               success: false,
               message: 'Post Validation Failed',
             });
+            db.close();
           }
         })
         .catch((error) => {
           res.status(500).json({ success: false, message: error });
+          db.close();
         });
     } else {
       res.status(401).json({
@@ -122,6 +128,7 @@ router.post('/update', (req, res) => {
                           error: error,
                         });
                       }
+                      db.close();
                     });
                   } else {
                     res.status(500).json({
@@ -129,6 +136,7 @@ router.post('/update', (req, res) => {
                       message: 'Failed to get Post',
                       error: error,
                     });
+                    db.close();
                   }
                 });
               } else {
@@ -137,6 +145,7 @@ router.post('/update', (req, res) => {
                   message: 'No Post Found to Update',
                   error: error,
                 });
+                db.close();
               }
             });
           } else {
@@ -144,10 +153,12 @@ router.post('/update', (req, res) => {
               success: false,
               message: 'No Post Found to Update',
             });
+            db.close();
           }
         })
         .catch((error) => {
           res.status(500).json({ success: false, message: error });
+          db.close();
         });
     } else {
       res.status(401).json({
@@ -186,6 +197,7 @@ router.post('/delete', (req, res) => {
                       error: error,
                     });
                   }
+                  db.close();
                 });
               } else {
                 res.status(404).json({
@@ -200,10 +212,12 @@ router.post('/delete', (req, res) => {
               success: false,
               message: 'No ID Found in Your Reqs',
             });
+            db.close();
           }
         })
         .catch((error) => {
           res.status(500).json({ success: false, message: error });
+          db.close();
         });
     } else {
       res.status(401).json({

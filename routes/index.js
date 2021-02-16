@@ -7,6 +7,7 @@ const db = require('../helpers/mongo');
 router.use('/blog', require('./blog'));
 router.use('/author', require('./author'));
 router.use('/stories', require('./stories'));
+router.use('/gallery', require('./gallery'));
 
 router.get(/(\/.*)+/, (req, res) => {
   res.status(401).sendFile(path.resolve(__dirname, '../views/index.html'));
@@ -20,9 +21,11 @@ router.post('/', (req, res) => {
           success: true,
           message: 'Backend and Database Working',
         });
+        db.close();
       })
       .catch((error) => {
         res.status(500).json({ success: false, message: error });
+        db.close();
       });
   } else {
     res.status(401).json({
