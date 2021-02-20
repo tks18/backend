@@ -1,25 +1,23 @@
 const express = require('express');
 const router = express.Router();
-const originCheck = require('../../helpers/checkOrigin');
+const originCheck = require('../../../helpers/checkOrigin');
 const axios = require('axios');
 
-let url = 'https://api.unsplash.com/';
-let path = 'users/shantk18/photos';
+let url = 'https://api.nasa.gov/';
+let apodpath = 'planetary/apod';
+let nasaKey = process.env.NASA_API;
 
-router.post('/get', (req, res) => {
+router.post('/apod', (req, res) => {
   if (originCheck(req.headers.origin)) {
     axios
-      .get(`${url}${path}`, {
-        params: { per_page: 10, order_by: 'latest' },
-        headers: {
-          Authorization: `Client-ID ${process.env.UNSPLASH_ACCESS}`,
-        },
+      .get(`${url}${apodpath}`, {
+        params: { api_key: nasaKey },
       })
-      .then((resp) => {
-        if (resp.status == 200 && resp.data) {
+      .then((response) => {
+        if (response.status == 200 && response.data) {
           res.status(200).json({
             success: true,
-            data: resp.data,
+            data: response.data,
           });
         } else {
           res.status(500).json({
