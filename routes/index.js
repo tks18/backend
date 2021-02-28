@@ -8,6 +8,7 @@ router.use('/blog', require('./blog'));
 router.use('/author', require('./author'));
 router.use('/stories', require('./stories'));
 router.use('/gallery', require('./gallery'));
+router.use('/notification', require('./notifications'));
 router.use('/externals', require('./externals'));
 
 router.get(/(\/.*)+/, (req, res) => {
