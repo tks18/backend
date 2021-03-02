@@ -9,10 +9,11 @@ router.use('/author', require('./author'));
 router.use('/stories', require('./stories'));
 router.use('/gallery', require('./gallery'));
 router.use('/notification', require('./notifications'));
+router.use('/tips', require('./tips'));
 router.use('/externals', require('./externals'));
 
 router.get(/(\/.*)+/, (req, res) => {
-  res.status(401).sendFile(path.resolve(__dirname, '../views/index.html'));
+  res.status(200).sendFile(path.resolve(__dirname, '../views/index.html'));
 });
 
 router.post('/', (req, res) => {
