@@ -13,7 +13,7 @@ router.use('/tips', require('./tips'));
 router.use('/externals', require('./externals'));
 
 router.get(/(\/.*)+/, (req, res) => {
-  res.status(200).sendFile(path.resolve(__dirname, '../views/index.html'));
+  res.status(200).sendFile(path.resolve(__dirname, '../public/index.html'));
 });
 
 router.post('/', (req, res) => {
