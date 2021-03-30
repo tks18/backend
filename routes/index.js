@@ -10,6 +10,7 @@ router.use('/stories', require('./stories'));
 router.use('/gallery', require('./gallery'));
 router.use('/notification', require('./notifications'));
 router.use('/tips', require('./tips'));
+router.use('/google', require('./google'));
 router.use('/externals', require('./externals'));
 
 router.get(/(\/.*)+/, (req, res) => {
