@@ -33,12 +33,13 @@ exports.gen_token = async (client_id, client_sec, refresh_token) => {
       };
     });
   if (auth_response.success && auth_response.data != null) {
-    let current_time = Math.round(Date.now() / 1000);
+    let current_time = Date.now();
+    let expiry_time = current_time + auth_response.data.expires_in * 1000;
     return {
       success: true,
       error: null,
       access_token: auth_response.data.access_token,
-      expires_in: current_time + auth_response.data.expires_in,
+      expires_in: expiry_time,
       scope: auth_response.data.scope,
       token_type: auth_response.data.token_type,
     };

@@ -17,6 +17,11 @@ const token_schema = {
     unique: false,
     default: Date.now(),
   },
+  website: {
+    type: String,
+    required: true,
+    unique: false,
+  },
   expires_in: {
     type: Date,
     required: true,
