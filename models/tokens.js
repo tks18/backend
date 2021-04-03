@@ -8,8 +8,6 @@ const token_schema = {
   type: {
     type: String,
     required: true,
-    unique: true,
-    lowercase: true,
   },
   time: {
     type: Date,
@@ -39,6 +37,6 @@ const token_schema = {
   },
 };
 
-const Token = mongoose.model('token_schema', token_schema);
+const Token = mongoose.model('Token', token_schema);
 
 module.exports = Token;
