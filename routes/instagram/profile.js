@@ -28,13 +28,12 @@ router.post('/', (req, res) => {
                 if (token_refresh.refreshed) {
                 } else {
                   axios
-                    .get(api.media(access_token.token))
+                    .get(api.profile(access_token.token))
                     .then((response) => {
                       if (response.status == 200 && response.data) {
-                        let posts = response.data.data;
                         res.status(200).json({
                           success: true,
-                          posts,
+                          ...response.data,
                         });
                       } else {
                         res.status(500).json({

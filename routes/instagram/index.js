@@ -3,7 +3,11 @@ const router = express.Router();
 
 //Local
 const db = require('../../helpers/mongo');
-const { get_auth_code_url, gen_token } = require('../../helpers/ig-oauth');
+const {
+  get_auth_code_url,
+  create_access_token,
+  gen_long_token,
+} = require('../../helpers/ig-oauth');
 
 //Model
 const Tokens = require('../../models/tokens');
@@ -25,81 +29,92 @@ router.get('/oauth', (req, res) => {
             })[0];
             if (req.query && req.query.code) {
               let auth_code = req.query.code;
-              let auth_response = await gen_token(
+              let short_auth_response = await create_access_token(
                 client_id.token,
                 client_secret.token,
                 auth_code,
               );
-              if (auth_response.success) {
-                Tokens.find(
-                  {
-                    website: 'instagram.com',
-                    scope: 'profile,media',
-                    type: 'access',
-                  },
-                  (error, old_access_tokens) => {
-                    if (
-                      !error &&
-                      old_access_tokens &&
-                      old_access_tokens.length > 0
-                    ) {
-                      Tokens.deleteOne(old_access_tokens[0], (error) => {
-                        if (!error) {
-                          let new_token = Tokens({
-                            token: auth_response.access_token,
-                            type: 'access',
-                            time: Date.now(),
-                            website: 'instagram.com',
-                            expires_in: Date.now() + 5184000000,
-                            scope: 'profile,media',
-                          });
-                          new_token.save((error, new_access_token) => {
-                            if (!error && new_access_token) {
-                              res.status(200).json({
-                                success: true,
-                                message: 'Successfully Saved the token in db',
-                                expires_in: Date.now() + 5184000000,
-                              });
-                            } else {
-                              res.status(500).json({
-                                success: false,
-                                error: 'Error saving New Token',
-                              });
-                            }
-                          });
-                        } else {
-                          res.status(500).json({
-                            success: false,
-                            error: 'Error Deleting old token',
-                          });
-                        }
-                      });
-                    } else {
-                      let new_token = Tokens({
-                        token: auth_response.access_token,
-                        type: 'access',
-                        time: Date.now(),
-                        website: 'instagram.com',
-                        expires_in: Date.now() + 5184000000,
-                        scope: 'profile,media',
-                      });
-                      new_token.save((error, new_access_token) => {
-                        if (!error && new_access_token) {
-                          res.status(200).json({
-                            success: true,
-                            message: 'Successfully Saved the token in db',
-                            expires_in: Date.now() + 5184000000,
-                          });
-                        } else {
-                          res.status(500).json({
-                            success: false,
-                            error: 'Error saving New Token',
-                          });
-                        }
-                      });
-                    }
-                  },
+              if (short_auth_response.success) {
+                let exchange_response = await gen_long_token(
+                  client_secret.token,
+                  short_auth_response.access_token,
                 );
+                if (exchange_response.success) {
+                  Tokens.find(
+                    {
+                      website: 'instagram.com',
+                      scope: 'profile,media',
+                      type: 'access',
+                    },
+                    (error, old_access_tokens) => {
+                      if (
+                        !error &&
+                        old_access_tokens &&
+                        old_access_tokens.length > 0
+                      ) {
+                        Tokens.deleteOne(old_access_tokens[0], (error) => {
+                          if (!error) {
+                            let new_token = Tokens({
+                              token: exchange_response.access_token,
+                              type: 'access',
+                              time: Date.now(),
+                              website: 'instagram.com',
+                              expires_in: Date.now() + 5184000000,
+                              scope: 'profile,media',
+                            });
+                            new_token.save((error, new_access_token) => {
+                              if (!error && new_access_token) {
+                                res.status(200).json({
+                                  success: true,
+                                  message: 'Successfully Saved the token in db',
+                                  expires_in: new_access_token.expires_in,
+                                });
+                              } else {
+                                res.status(500).json({
+                                  success: false,
+                                  error: 'Error saving New Token',
+                                });
+                              }
+                            });
+                          } else {
+                            res.status(500).json({
+                              success: false,
+                              error: 'Error Deleting old token',
+                            });
+                          }
+                        });
+                      } else {
+                        let new_token = Tokens({
+                          token: exchange_response.access_token,
+                          type: 'access',
+                          time: Date.now(),
+                          website: 'instagram.com',
+                          expires_in: Date.now() + 5184000000,
+                          scope: 'profile,media',
+                        });
+                        new_token.save((error, new_access_token) => {
+                          if (!error && new_access_token) {
+                            res.status(200).json({
+                              success: true,
+                              message: 'Successfully Saved the token in db',
+                              expires_in: new_access_token.expires_in,
+                            });
+                          } else {
+                            res.status(500).json({
+                              success: false,
+                              error: 'Error saving New Token',
+                            });
+                          }
+                        });
+                      }
+                    },
+                  );
+                } else {
+                  res.status(500).json({
+                    success: false,
+                    error: 'Error Exchanging the Auth token',
+                  });
+                }
               } else {
                 res.status(500).json({
                   success: false,
@@ -127,6 +142,7 @@ router.get('/oauth', (req, res) => {
     });
 });
 
+router.use('/profile', require('./profile'));
 router.use('/media', require('./media'));
 
 module.exports = router;
