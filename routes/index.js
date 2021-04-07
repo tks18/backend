@@ -10,6 +10,7 @@ router.use('/stories', require('./stories'));
 router.use('/gallery', require('./gallery'));
 router.use('/notification', require('./notifications'));
 router.use('/tips', require('./tips'));
+router.use('/github', require('./github'));
 router.use('/google', require('./google'));
 router.use('/ig', require('./instagram'));
 router.use('/externals', require('./externals'));
