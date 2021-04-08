@@ -1,12 +1,16 @@
 let api = {
   repo: {
-    list: 'https://api.github.com/users/tks18/repos?sort=updated&per_page=20',
-    data: (repo) => `https://api.github.com/repos/tks18/${repo}`,
-    topics: (repo) => `https://api.github.com/repos/tks18/${repo}/topics`,
-    contents: (repo, path) =>
-      `https://api.github.com/repos/tks18/${repo}/contents${path}`,
-    branches: (repo) => `https://api.github.com/repos/tks18/${repo}/branches`,
-    commits: (repo) => `https://api.github.com/repos/tks18/${repo}/commits`,
+    list: (user) =>
+      `https://api.github.com/users/${user}/repos?sort=updated&per_page=20`,
+    data: (user, repo) => `https://api.github.com/repos/${user}/${repo}`,
+    topics: (user, repo) =>
+      `https://api.github.com/repos/${user}/${repo}/topics`,
+    contents: (user, repo, path) =>
+      `https://api.github.com/repos/${user}/${repo}/contents${path}`,
+    branches: (user, repo) =>
+      `https://api.github.com/repos/${user}/${repo}/branches`,
+    commits: (user, repo) =>
+      `https://api.github.com/repos/${user}/${repo}/commits`,
   },
 };
 

@@ -13,6 +13,14 @@ const Tokens = require('../../models/tokens');
 
 router.post('/list', (req, res) => {
   if (originCheck(req.headers.origin)) {
+    let user = req.body.user;
+    if (user) {
+    } else {
+      res.status(404).json({
+        success: false,
+        error: 'Required Detail Not Sent - username',
+      });
+    }
     db.connect()
       .then(() => {
         Tokens.findOne(
@@ -24,7 +32,7 @@ router.post('/list', (req, res) => {
           (error, access_token) => {
             if (!error && access_token) {
               axios
-                .get(api.repo.list, {
+                .get(api.repo.list(user), {
                   headers: gh_headers(access_token.token),
                 })
                 .then((response) => {
@@ -72,8 +80,9 @@ router.post('/list', (req, res) => {
 
 router.post('/data', (req, res) => {
   if (originCheck(req.headers.origin)) {
+    let user = req.body.user;
     let repo = req.body.repo;
-    if (repo) {
+    if (user && repo) {
       db.connect()
         .then(() => {
           Tokens.findOne(
@@ -85,7 +94,7 @@ router.post('/data', (req, res) => {
             (error, access_token) => {
               if (!error && access_token) {
                 axios
-                  .get(api.repo.data(repo), {
+                  .get(api.repo.data(user, repo), {
                     headers: gh_headers(access_token.token),
                   })
                   .then((response) => {
@@ -139,8 +148,9 @@ router.post('/data', (req, res) => {
 
 router.post('/branches', (req, res) => {
   if (originCheck(req.headers.origin)) {
+    let user = req.body.user;
     let repo = req.body.repo;
-    if (repo) {
+    if (user && repo) {
       db.connect()
         .then(() => {
           Tokens.findOne(
@@ -152,7 +162,7 @@ router.post('/branches', (req, res) => {
             (error, access_token) => {
               if (!error && access_token) {
                 axios
-                  .get(api.repo.branches(repo), {
+                  .get(api.repo.branches(user, repo), {
                     headers: gh_headers(access_token.token),
                   })
                   .then((response) => {
@@ -206,11 +216,12 @@ router.post('/branches', (req, res) => {
 
 router.post('/commits', (req, res) => {
   if (originCheck(req.headers.origin)) {
+    let user = req.body.user;
     let repo = req.body.repo;
     let branch = req.body.branch;
     let nos = req.body.nos;
     let page = req.body.page;
-    if (repo && branch && nos && page) {
+    if (user && repo && branch && nos && page) {
       db.connect()
         .then(() => {
           Tokens.findOne(
@@ -222,7 +233,7 @@ router.post('/commits', (req, res) => {
             (error, access_token) => {
               if (!error && access_token) {
                 axios
-                  .get(api.repo.commits(repo), {
+                  .get(api.repo.commits(user, repo), {
                     headers: gh_headers(access_token.token),
                     params: {
                       sha: branch,
@@ -281,8 +292,9 @@ router.post('/commits', (req, res) => {
 
 router.post('/topics', (req, res) => {
   if (originCheck(req.headers.origin)) {
+    let user = req.body.user;
     let repo = req.body.repo;
-    if (repo) {
+    if (user && repo) {
       db.connect()
         .then(() => {
           Tokens.findOne(
@@ -294,7 +306,7 @@ router.post('/topics', (req, res) => {
             (error, access_token) => {
               if (!error && access_token) {
                 axios
-                  .get(api.repo.topics(repo), {
+                  .get(api.repo.topics(user, repo), {
                     headers: {
                       ...gh_headers(access_token.token),
                       Accept: 'application/vnd.github.mercy-preview+json',
@@ -351,10 +363,11 @@ router.post('/topics', (req, res) => {
 
 router.post('/contents', (req, res) => {
   if (originCheck(req.headers.origin)) {
+    let user = req.body.user;
     let repo = req.body.repo;
     let path = req.body.path;
     let branch = req.body.branch;
-    if (repo && path && branch) {
+    if (user && repo && path && branch) {
       db.connect()
         .then(() => {
           Tokens.findOne(
@@ -366,7 +379,7 @@ router.post('/contents', (req, res) => {
             (error, access_token) => {
               if (!error && access_token) {
                 axios
-                  .get(api.repo.contents(repo, path), {
+                  .get(api.repo.contents(user, repo, path), {
                     headers: gh_headers(access_token.token),
                     params: {
                       ref: branch,
