@@ -65,3 +65,9 @@ exports.gen_token = async (client_id, client_secret, token) => {
     };
   }
 };
+
+exports.gh_headers = (token) => {
+  return {
+    Authorization: `token ${token}`,
+  };
+};

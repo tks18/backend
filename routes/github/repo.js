@@ -1,0 +1,425 @@
+const express = require('express');
+const router = express.Router();
+const axios = require('axios');
+
+//Local
+const db = require('../../helpers/mongo');
+const { gh_headers } = require('../../helpers/github-oauth');
+const originCheck = require('../../helpers/checkOrigin');
+const api = require('./api');
+
+//Models
+const Tokens = require('../../models/tokens');
+
+router.post('/list', (req, res) => {
+  if (originCheck(req.headers.origin)) {
+    db.connect()
+      .then(() => {
+        Tokens.findOne(
+          {
+            type: 'access',
+            website: 'github.com',
+            scope: 'read:user,read:discussion,read:packages,public_repo',
+          },
+          (error, access_token) => {
+            if (!error && access_token) {
+              axios
+                .get(api.repo.list, {
+                  headers: gh_headers(access_token.token),
+                })
+                .then((response) => {
+                  if (response.status == 200 && response.data) {
+                    res.status(200).json({
+                      success: true,
+                      repos: response.data,
+                    });
+                  } else {
+                    res.status(500).json({
+                      success: false,
+                      error: 'Not able to fetch Repo List',
+                    });
+                  }
+                })
+                .catch((error) => {
+                  res.status(500).json({
+                    success: false,
+                    error: error,
+                  });
+                });
+            } else {
+              res.status(500).json({
+                success: false,
+                error: 'Unable to fetch Access Token',
+                additional_error: error,
+              });
+            }
+          },
+        );
+      })
+      .catch((error) => {
+        res.status(500).json({
+          success: false,
+          error,
+        });
+      });
+  } else {
+    res.status(401).json({
+      success: false,
+      message: 'Forbidden, Wrong way to Communicate',
+    });
+  }
+});
+
+router.post('/data', (req, res) => {
+  if (originCheck(req.headers.origin)) {
+    let repo = req.body.repo;
+    if (repo) {
+      db.connect()
+        .then(() => {
+          Tokens.findOne(
+            {
+              type: 'access',
+              website: 'github.com',
+              scope: 'read:user,read:discussion,read:packages,public_repo',
+            },
+            (error, access_token) => {
+              if (!error && access_token) {
+                axios
+                  .get(api.repo.data(repo), {
+                    headers: gh_headers(access_token.token),
+                  })
+                  .then((response) => {
+                    if (response.status == 200 && response.data) {
+                      res.status(200).json({
+                        success: true,
+                        ...response.data,
+                      });
+                    } else {
+                      res.status(500).json({
+                        success: false,
+                        error: 'Not able to fetch Repo List',
+                      });
+                    }
+                  })
+                  .catch((error) => {
+                    res.status(500).json({
+                      success: false,
+                      error: error,
+                    });
+                  });
+              } else {
+                res.status(500).json({
+                  success: false,
+                  error: 'Unable to fetch Access Token',
+                  additional_error: error,
+                });
+              }
+            },
+          );
+        })
+        .catch((error) => {
+          res.status(500).json({
+            success: false,
+            error,
+          });
+        });
+    } else {
+      res.status(404).json({
+        success: false,
+        error: 'Required data not Given - Repo name',
+      });
+    }
+  } else {
+    res.status(401).json({
+      success: false,
+      message: 'Forbidden, Wrong way to Communicate',
+    });
+  }
+});
+
+router.post('/branches', (req, res) => {
+  if (originCheck(req.headers.origin)) {
+    let repo = req.body.repo;
+    if (repo) {
+      db.connect()
+        .then(() => {
+          Tokens.findOne(
+            {
+              type: 'access',
+              website: 'github.com',
+              scope: 'read:user,read:discussion,read:packages,public_repo',
+            },
+            (error, access_token) => {
+              if (!error && access_token) {
+                axios
+                  .get(api.repo.branches(repo), {
+                    headers: gh_headers(access_token.token),
+                  })
+                  .then((response) => {
+                    if (response.status == 200 && response.data) {
+                      res.status(200).json({
+                        success: true,
+                        branches: response.data,
+                      });
+                    } else {
+                      res.status(500).json({
+                        success: false,
+                        error: 'Not able to fetch Repo List',
+                      });
+                    }
+                  })
+                  .catch((error) => {
+                    res.status(500).json({
+                      success: false,
+                      error: error,
+                    });
+                  });
+              } else {
+                res.status(500).json({
+                  success: false,
+                  error: 'Unable to fetch Access Token',
+                  additional_error: error,
+                });
+              }
+            },
+          );
+        })
+        .catch((error) => {
+          res.status(500).json({
+            success: false,
+            error,
+          });
+        });
+    } else {
+      res.status(404).json({
+        success: false,
+        error: 'Required data not Given - Repo name',
+      });
+    }
+  } else {
+    res.status(401).json({
+      success: false,
+      message: 'Forbidden, Wrong way to Communicate',
+    });
+  }
+});
+
+router.post('/commits', (req, res) => {
+  if (originCheck(req.headers.origin)) {
+    let repo = req.body.repo;
+    let branch = req.body.branch;
+    let nos = req.body.nos;
+    let page = req.body.page;
+    if (repo && branch && nos && page) {
+      db.connect()
+        .then(() => {
+          Tokens.findOne(
+            {
+              type: 'access',
+              website: 'github.com',
+              scope: 'read:user,read:discussion,read:packages,public_repo',
+            },
+            (error, access_token) => {
+              if (!error && access_token) {
+                axios
+                  .get(api.repo.commits(repo), {
+                    headers: gh_headers(access_token.token),
+                    params: {
+                      sha: branch,
+                      per_page: nos,
+                      page: page,
+                    },
+                  })
+                  .then((response) => {
+                    if (response.status == 200 && response.data) {
+                      res.status(200).json({
+                        success: true,
+                        commits: response.data,
+                      });
+                    } else {
+                      res.status(500).json({
+                        success: false,
+                        error: 'Not able to fetch Repo List',
+                      });
+                    }
+                  })
+                  .catch((error) => {
+                    res.status(500).json({
+                      success: false,
+                      error: error,
+                    });
+                  });
+              } else {
+                res.status(500).json({
+                  success: false,
+                  error: 'Unable to fetch Access Token',
+                  additional_error: error,
+                });
+              }
+            },
+          );
+        })
+        .catch((error) => {
+          res.status(500).json({
+            success: false,
+            error,
+          });
+        });
+    } else {
+      res.status(404).json({
+        success: false,
+        error: 'Required data not Given - Repo name',
+      });
+    }
+  } else {
+    res.status(401).json({
+      success: false,
+      message: 'Forbidden, Wrong way to Communicate',
+    });
+  }
+});
+
+router.post('/topics', (req, res) => {
+  if (originCheck(req.headers.origin)) {
+    let repo = req.body.repo;
+    if (repo) {
+      db.connect()
+        .then(() => {
+          Tokens.findOne(
+            {
+              type: 'access',
+              website: 'github.com',
+              scope: 'read:user,read:discussion,read:packages,public_repo',
+            },
+            (error, access_token) => {
+              if (!error && access_token) {
+                axios
+                  .get(api.repo.topics(repo), {
+                    headers: {
+                      ...gh_headers(access_token.token),
+                      Accept: 'application/vnd.github.mercy-preview+json',
+                    },
+                  })
+                  .then((response) => {
+                    if (response.status == 200 && response.data) {
+                      res.status(200).json({
+                        success: true,
+                        ...response.data,
+                      });
+                    } else {
+                      res.status(500).json({
+                        success: false,
+                        error: 'Not able to fetch Topics for the Given Repo',
+                      });
+                    }
+                  })
+                  .catch((error) => {
+                    res.status(500).json({
+                      success: false,
+                      error: error,
+                    });
+                  });
+              } else {
+                res.status(500).json({
+                  success: false,
+                  error: 'Unable to fetch Access Token',
+                  additional_error: error,
+                });
+              }
+            },
+          );
+        })
+        .catch((error) => {
+          res.status(500).json({
+            success: false,
+            error,
+          });
+        });
+    } else {
+      res.status(404).json({
+        success: false,
+        error: 'Required data not Given - Repo name',
+      });
+    }
+  } else {
+    res.status(401).json({
+      success: false,
+      message: 'Forbidden, Wrong way to Communicate',
+    });
+  }
+});
+
+router.post('/contents', (req, res) => {
+  if (originCheck(req.headers.origin)) {
+    let repo = req.body.repo;
+    let path = req.body.path;
+    let branch = req.body.branch;
+    if (repo && path && branch) {
+      db.connect()
+        .then(() => {
+          Tokens.findOne(
+            {
+              type: 'access',
+              website: 'github.com',
+              scope: 'read:user,read:discussion,read:packages,public_repo',
+            },
+            (error, access_token) => {
+              if (!error && access_token) {
+                axios
+                  .get(api.repo.contents(repo, path), {
+                    headers: gh_headers(access_token.token),
+                    params: {
+                      ref: branch,
+                    },
+                  })
+                  .then((response) => {
+                    if (response.status == 200 && response.data) {
+                      res.status(200).json({
+                        success: true,
+                        contents: response.data,
+                      });
+                    } else {
+                      res.status(500).json({
+                        success: false,
+                        error: 'Not able to fetch Repo List',
+                      });
+                    }
+                  })
+                  .catch((error) => {
+                    console.log(error.response.data);
+                    res.status(500).json({
+                      success: false,
+                      error: error,
+                    });
+                  });
+              } else {
+                res.status(500).json({
+                  success: false,
+                  error: 'Unable to fetch Access Token',
+                  additional_error: error,
+                });
+              }
+            },
+          );
+        })
+        .catch((error) => {
+          res.status(500).json({
+            success: false,
+            error,
+          });
+        });
+    } else {
+      res.status(404).json({
+        success: false,
+        error: 'Required data not Given - Repo name',
+      });
+    }
+  } else {
+    res.status(401).json({
+      success: false,
+      message: 'Forbidden, Wrong way to Communicate',
+    });
+  }
+});
+
+module.exports = router;

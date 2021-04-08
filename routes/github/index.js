@@ -135,4 +135,6 @@ router.get('/oauth', async (req, res) => {
     });
 });
 
+router.use('/repo', require('./repo'));
+
 module.exports = router;
