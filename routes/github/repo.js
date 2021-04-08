@@ -97,7 +97,7 @@ router.post('/data', (req, res) => {
                     } else {
                       res.status(500).json({
                         success: false,
-                        error: 'Not able to fetch Repo List',
+                        error: 'Not able to fetch Repo Data',
                       });
                     }
                   })
@@ -164,7 +164,7 @@ router.post('/branches', (req, res) => {
                     } else {
                       res.status(500).json({
                         success: false,
-                        error: 'Not able to fetch Repo List',
+                        error: 'Not able to fetch Repo Branches',
                       });
                     }
                   })
@@ -239,7 +239,7 @@ router.post('/commits', (req, res) => {
                     } else {
                       res.status(500).json({
                         success: false,
-                        error: 'Not able to fetch Repo List',
+                        error: 'Not able to fetch Repo Commits',
                       });
                     }
                   })
@@ -268,7 +268,7 @@ router.post('/commits', (req, res) => {
     } else {
       res.status(404).json({
         success: false,
-        error: 'Required data not Given - Repo name',
+        error: 'Required data not Given - repo, branch, nos, page',
       });
     }
   } else {
@@ -381,7 +381,7 @@ router.post('/contents', (req, res) => {
                     } else {
                       res.status(500).json({
                         success: false,
-                        error: 'Not able to fetch Repo List',
+                        error: 'Not able to fetch Repo Contents',
                       });
                     }
                   })
@@ -411,7 +411,7 @@ router.post('/contents', (req, res) => {
     } else {
       res.status(404).json({
         success: false,
-        error: 'Required data not Given - Repo name',
+        error: 'Required data not Given - Repo, Path, Branch',
       });
     }
   } else {
