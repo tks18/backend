@@ -12,6 +12,7 @@ router.use('/notification', require('./notifications'));
 router.use('/tips', require('./tips'));
 router.use('/github', require('./github'));
 router.use('/google', require('./google'));
+router.use('/twitter', require('./twitter'));
 router.use('/ig', require('./instagram'));
 router.use('/externals', require('./externals'));
 
