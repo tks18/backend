@@ -1,13 +1,15 @@
 const express = require('express');
 const router = express.Router();
+
+// Local
 const db = require('../../helpers/mongo');
 const originCheck = require('../../helpers/checkOrigin');
 const jwtverify = require('../../helpers/jwtVerify');
 
-const website = 'https://webstories.shaaan.tk';
-
 //Models
 const Stories = require('../../models/stories');
+
+let website = 'https://webstories.shaaan.tk';
 
 router.post('/get', (req, res) => {
   if (originCheck(req.headers.origin)) {
