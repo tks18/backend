@@ -20,7 +20,6 @@ app.use(xss());
 app.use(function (req, res, next) {
   let allowedDomains = process.env.FRONT.split(',');
   var origin = req.headers.origin;
-  console.log(allowedDomains, origin);
   if (allowedDomains.indexOf(origin) > -1) {
     res.setHeader('Access-Control-Allow-Origin', origin);
   }
