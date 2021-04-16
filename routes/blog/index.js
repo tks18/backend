@@ -1,19 +1,20 @@
 const express = require('express');
+
 const router = express.Router();
 const originCheck = require('../../helpers/checkOrigin');
 const db = require('../../helpers/mongo');
 const jwtverify = require('../../helpers/jwtVerify');
 
-//model
+// Models
 const Blog = require('../../models/blog');
 
 router.post('/get', (req, res) => {
   if (originCheck(req.headers.origin)) {
     db.connect()
       .then(() => {
-        let type = req.body.type;
-        if (type && type.toLowerCase() == 'single') {
-          let id = req.body.id;
+        const { type } = req.body;
+        if (type && type.toLowerCase() === 'single') {
+          const { id } = req.body;
           Blog.findOne({ _id: id }, (error, post) => {
             if (!error) {
               res.status(200).json({ success: true, post });
@@ -21,7 +22,7 @@ router.post('/get', (req, res) => {
               res.status(404).json({
                 success: false,
                 message: 'Error Finding Post',
-                error: error,
+                error,
               });
             }
             db.close();
@@ -34,7 +35,7 @@ router.post('/get', (req, res) => {
               res.status(404).json({
                 success: false,
                 message: 'Error Finding Posts',
-                error: error,
+                error,
               });
             }
             db.close();
@@ -55,13 +56,13 @@ router.post('/get', (req, res) => {
 
 router.post('/set', (req, res) => {
   if (originCheck(req.headers.origin)) {
-    let token = req.headers.token;
+    const { token } = req.headers;
     if (jwtverify(token)) {
       db.connect()
         .then(() => {
-          let post = req.body.post;
+          const { post } = req.body;
           if (post) {
-            let newBlogPost = new Blog(post);
+            const newBlogPost = new Blog(post);
             newBlogPost.save((error, doc) => {
               if (!error) {
                 res.status(200).json({
@@ -103,20 +104,20 @@ router.post('/set', (req, res) => {
 
 router.post('/update', (req, res) => {
   if (originCheck(req.headers.origin)) {
-    let token = req.headers.token;
+    const { token } = req.headers;
     if (jwtverify(token)) {
       db.connect()
         .then(() => {
-          let origpost = req.body.post;
-          let id = req.body.id;
+          const origpost = req.body.post;
+          const { id } = req.body;
           if (origpost && id) {
-            Blog.findOne({ _id: id }, (error, post) => {
-              if (!error && post) {
-                Blog.deleteOne({ _id: id }, (error) => {
-                  if (!error) {
-                    let newBlogPost = new Blog(origpost);
-                    newBlogPost.save((error, doc) => {
-                      if (!error && doc) {
+            Blog.findOne({ _id: id }, (doc_error, post) => {
+              if (!doc_error && post) {
+                Blog.deleteOne({ _id: id }, (del_error) => {
+                  if (!del_error) {
+                    const newBlogPost = new Blog(origpost);
+                    newBlogPost.save((save_error, doc) => {
+                      if (!save_error && doc) {
                         res.status(200).json({
                           success: true,
                           message: 'Successfully Updated',
@@ -125,7 +126,7 @@ router.post('/update', (req, res) => {
                         res.status(500).json({
                           success: false,
                           message: 'Failed to Update Post',
-                          error: error,
+                          save_error,
                         });
                       }
                       db.close();
@@ -134,7 +135,7 @@ router.post('/update', (req, res) => {
                     res.status(500).json({
                       success: false,
                       message: 'Failed to get Post',
-                      error: error,
+                      del_error,
                     });
                     db.close();
                   }
@@ -143,7 +144,7 @@ router.post('/update', (req, res) => {
                 res.status(404).json({
                   success: false,
                   message: 'No Post Found to Update',
-                  error: error,
+                  doc_error,
                 });
                 db.close();
               }
@@ -176,16 +177,16 @@ router.post('/update', (req, res) => {
 
 router.post('/delete', (req, res) => {
   if (originCheck(req.headers.origin)) {
-    let token = req.headers.token;
+    const { token } = req.headers;
     if (jwtverify(token)) {
       db.connect()
         .then(() => {
-          let id = req.body.id;
+          const { id } = req.body;
           if (id) {
-            Blog.findOne({ _id: id }, (error, doc) => {
-              if (!error && doc) {
-                Blog.deleteOne({ _id: id }, (error) => {
-                  if (!error) {
+            Blog.findOne({ _id: id }, (doc_error, doc) => {
+              if (!doc_error && doc) {
+                Blog.deleteOne({ _id: id }, (del_error) => {
+                  if (!del_error) {
                     res.status(200).json({
                       success: true,
                       message: 'Successfully Deleted',
@@ -194,7 +195,7 @@ router.post('/delete', (req, res) => {
                     res.status(500).json({
                       success: false,
                       message: 'Error While Deleting the Post',
-                      error: error,
+                      del_error,
                     });
                   }
                   db.close();
@@ -203,7 +204,7 @@ router.post('/delete', (req, res) => {
                 res.status(404).json({
                   success: false,
                   message: 'No Post Found With Your ID',
-                  error: error,
+                  doc_error,
                 });
               }
             });

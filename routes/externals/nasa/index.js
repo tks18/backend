@@ -1,11 +1,13 @@
 const express = require('express');
+
 const router = express.Router();
-const originCheck = require('../../../helpers/checkOrigin');
 const axios = require('axios');
 
-let url = 'https://api.nasa.gov/';
-let apodpath = 'planetary/apod';
-let nasaKey = process.env.NASA_API;
+const originCheck = require('../../../helpers/checkOrigin');
+
+const url = 'https://api.nasa.gov/';
+const apodpath = 'planetary/apod';
+const nasaKey = process.env.NASA_API;
 
 router.post('/apod', (req, res) => {
   if (originCheck(req.headers.origin)) {
@@ -14,7 +16,7 @@ router.post('/apod', (req, res) => {
         params: { api_key: nasaKey },
       })
       .then((response) => {
-        if (response.status == 200 && response.data) {
+        if (response.status === 200 && response.data) {
           res.status(200).json({
             success: true,
             data: response.data,

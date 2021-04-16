@@ -5,10 +5,12 @@ const helmet = require('helmet');
 const mongoSanitize = require('express-mongo-sanitize');
 const xss = require('xss-clean');
 const bodyParser = require('body-parser');
+const Path = require('path');
+
 const app = express();
 
-//Express Configs
-app.use(express.static(__dirname + '/public'));
+// Express Configs
+app.use(express.static(Path.join(__dirname, 'public')));
 app.use(express.json({ limit: '50kb' }));
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
@@ -16,10 +18,10 @@ app.use(helmet());
 app.use(mongoSanitize());
 app.use(xss());
 
-//Cors
-app.use(function (req, res, next) {
-  let allowedDomains = process.env.FRONT.split(',');
-  var origin = req.headers.origin;
+// Cors
+app.use((req, res, next) => {
+  const allowedDomains = process.env.FRONT.split(',');
+  const { origin } = req.headers;
   if (allowedDomains.indexOf(origin) > -1) {
     res.setHeader('Access-Control-Allow-Origin', origin);
   }
@@ -32,9 +34,9 @@ app.use(function (req, res, next) {
   next();
 });
 
-//Routes
+// Routes
 app.use('/', require('./routes/index'));
 
 const PORT = process.env.PORT || 3000;
 
-app.listen(PORT, console.log('Server Started on ' + PORT));
+app.listen(PORT);

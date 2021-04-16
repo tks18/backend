@@ -1,10 +1,11 @@
 const express = require('express');
+
 const router = express.Router();
 const originCheck = require('../../helpers/checkOrigin');
 const db = require('../../helpers/mongo');
 const jwtverify = require('../../helpers/jwtVerify');
 
-//Model
+// Model
 const Tips = require('../../models/tips');
 
 router.post('/get', (req, res) => {
@@ -13,16 +14,16 @@ router.post('/get', (req, res) => {
       .then(() => {
         Tips.find({}, (error, docs) => {
           if (!error && docs) {
-            let getType = req.body.type;
-            if (getType && getType == 'notification') {
-              let randomTip = docs[Math.floor(Math.random() * docs.length)];
+            const getType = req.body.type;
+            if (getType && getType === 'notification') {
+              const randomTip = docs[Math.floor(Math.random() * docs.length)];
               res.status(200).json({
                 success: true,
                 message: 'Fetched a Random Tip',
                 tip: randomTip,
               });
-            } else if (getType && getType == 'other') {
-              let randomTip = docs[Math.floor(Math.random() * docs.length)];
+            } else if (getType && getType === 'other') {
+              const randomTip = docs[Math.floor(Math.random() * docs.length)];
               res.status(200).json({
                 success: true,
                 message: 'Fetched a Random Tip',
@@ -33,7 +34,7 @@ router.post('/get', (req, res) => {
                   time: randomTip.time,
                 },
               });
-            } else if (getType && getType == 'all') {
+            } else if (getType && getType === 'all') {
               res.status(200).json({
                 success: true,
                 message: 'Fetched a Random Tip',
@@ -70,13 +71,13 @@ router.post('/get', (req, res) => {
 
 router.post('/set', (req, res) => {
   if (originCheck(req.headers.origin)) {
-    let token = req.headers.token;
+    const { token } = req.headers;
     if (jwtverify(token)) {
       db.connect()
         .then(() => {
-          let tip = req.body.tipProperties;
+          const tip = req.body.tipProperties;
           if (tip) {
-            let newTip = new Tips({
+            const newTip = new Tips({
               time: Date.now(),
               title: tip.title,
               subtitle: tip.subtitle,

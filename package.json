@@ -36,5 +36,12 @@
     "mongoose": "^5.11.10",
     "nodemailer": "^6.4.17",
     "xss-clean": "^0.1.1"
+  },
+  "devDependencies": {
+    "eslint": "^7.24.0",
+    "eslint-config-airbnb-base": "^14.2.1",
+    "eslint-plugin-import": "^2.22.1",
+    "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-promise": "^5.1.0"
   }
 }

@@ -1,4 +1,5 @@
 const express = require('express');
+
 const router = express.Router();
 const originCheck = require('../../helpers/checkOrigin');
 const db = require('../../helpers/mongo');
@@ -13,19 +14,19 @@ router.post('/get', (req, res) => {
       .then(() => {
         Notification.find({}, (error, docs) => {
           if (docs && !error) {
-            let reqType = req.body.type;
-            if (reqType && reqType == 'all') {
+            const reqType = req.body.type;
+            if (reqType && reqType === 'all') {
               res.status(200).json({
                 success: true,
                 message: 'Fetched Notifications',
                 notifications: docs,
               });
             } else {
-              let validPosts = [];
+              const validPosts = [];
               docs.forEach((notification) => {
-                let currentTime = Date.now();
-                let startStamp = new Date(notification.start);
-                let endStamp = new Date(notification.end);
+                const currentTime = Date.now();
+                const startStamp = new Date(notification.start);
+                const endStamp = new Date(notification.end);
                 if (currentTime < endStamp && currentTime > startStamp) {
                   validPosts.push(notification);
                 }
@@ -60,15 +61,15 @@ router.post('/get', (req, res) => {
 
 router.post('/set', (req, res) => {
   if (originCheck(req.headers.origin)) {
-    let token = req.headers.token;
+    const { token } = req.headers;
     if (jwtverify(token)) {
       db.connect()
         .then(() => {
-          let notify = req.body.notification;
-          let startStamp = req.body.startDate;
-          let endStamp = req.body.endDate;
+          const notify = req.body.notification;
+          const startStamp = req.body.startDate;
+          const endStamp = req.body.endDate;
           if (notify && startStamp && endStamp) {
-            let newNotification = new Notification({
+            const newNotification = new Notification({
               start: startStamp,
               end: endStamp,
               properties: notify,
@@ -118,19 +119,19 @@ router.post('/set', (req, res) => {
 
 router.post('/delete', (req, res) => {
   if (originCheck(req.headers.origin)) {
-    let token = req.headers.token;
+    const { token } = req.headers;
     if (jwtverify(token)) {
       db.connect()
         .then(() => {
-          let delType = req.body.type;
-          if (delType && delType == 'single') {
-            let notifyId = req.body.id;
+          const delType = req.body.type;
+          if (delType && delType === 'single') {
+            const notifyId = req.body.id;
             if (notifyId) {
               Notification.deleteOne({ _id: notifyId }, (error) => {
                 if (!error) {
                   res.status(200).json({
                     success: true,
-                    message: 'Successfully Deleted Notification id ' + notifyId,
+                    message: `Successfully Deleted Notification id ${notifyId}`,
                   });
                 } else {
                   res.status(500).json({

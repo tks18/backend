@@ -1,4 +1,4 @@
-let api = {
+const api = {
   repo: {
     list: (user) =>
       `https://api.github.com/users/${user}/repos?sort=updated&per_page=20`,

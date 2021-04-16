@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 
-let tipSchema = {
+const tipSchema = {
   time: {
     type: Date,
     default: Date.now,

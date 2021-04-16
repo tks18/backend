@@ -1,4 +1,5 @@
 const express = require('express');
+
 const router = express.Router();
 
 // Local
@@ -6,10 +7,10 @@ const db = require('../../helpers/mongo');
 const originCheck = require('../../helpers/checkOrigin');
 const jwtverify = require('../../helpers/jwtVerify');
 
-//Models
+// Models
 const Stories = require('../../models/stories');
 
-let website = 'https://webstories.shaaan.tk';
+const website = 'https://webstories.shaaan.tk';
 
 router.post('/get', (req, res) => {
   if (originCheck(req.headers.origin)) {
@@ -47,13 +48,13 @@ router.post('/get', (req, res) => {
 
 router.post('/set', (req, res) => {
   if (originCheck(req.headers.origin)) {
-    let token = req.headers.token;
+    const { token } = req.headers;
     if (jwtverify(token)) {
       db.connect()
         .then(() => {
-          let story = req.body.story;
+          const { story } = req.body;
           if (story) {
-            let newStory = new Stories(story);
+            const newStory = new Stories(story);
             newStory.save((error, savedStory) => {
               if (!error && savedStory) {
                 res.status(200).json({
@@ -75,7 +76,6 @@ router.post('/set', (req, res) => {
             res.status(404).json({
               success: false,
               message: 'Story Validation Failed',
-              error,
             });
             db.close();
           }

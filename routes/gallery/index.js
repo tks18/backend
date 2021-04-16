@@ -1,10 +1,11 @@
 const express = require('express');
-const router = express.Router();
-const originCheck = require('../../helpers/checkOrigin');
 const axios = require('axios');
 
-let url = 'https://api.unsplash.com/';
-let path = 'users/shantk18/photos';
+const router = express.Router();
+const originCheck = require('../../helpers/checkOrigin');
+
+const url = 'https://api.unsplash.com/';
+const path = 'users/shantk18/photos';
 
 router.post('/get', (req, res) => {
   if (originCheck(req.headers.origin)) {
@@ -16,7 +17,7 @@ router.post('/get', (req, res) => {
         },
       })
       .then((resp) => {
-        if (resp.status == 200 && resp.data) {
+        if (resp.status === 200 && resp.data) {
           res.status(200).json({
             success: true,
             data: resp.data,

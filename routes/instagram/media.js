@@ -1,14 +1,15 @@
 const axios = require('axios');
 const express = require('express');
+
 const router = express.Router();
 
-//Local
+// Local
 const db = require('../../helpers/mongo');
 const { refresh_token } = require('../../helpers/ig-oauth');
 const api = require('./api');
 const origin_check = require('../../helpers/checkOrigin');
 
-//Model
+// Model
 const Tokens = require('../../models/tokens');
 
 router.post('/', (req, res) => {
@@ -23,15 +24,19 @@ router.post('/', (req, res) => {
           },
           async (error, access_token) => {
             if (!error && access_token) {
-              let token_refresh = await refresh_token(access_token);
+              const token_refresh = await refresh_token(access_token);
               if (token_refresh.success) {
                 if (token_refresh.refreshed) {
+                  res.status(404).json({
+                    success: false,
+                    message: 'Work in Proress',
+                  });
                 } else {
                   axios
                     .get(api.media(access_token.token))
                     .then((response) => {
-                      if (response.status == 200 && response.data) {
-                        let posts = response.data.data;
+                      if (response.status === 200 && response.data) {
+                        const posts = response.data.data;
                         res.status(200).json({
                           success: true,
                           posts,
@@ -44,11 +49,11 @@ router.post('/', (req, res) => {
                         });
                       }
                     })
-                    .catch((error) => {
+                    .catch((fetch_error) => {
                       res.status(500).json({
                         success: false,
                         error: 'Error while getting Posts from Instagram',
-                        additional_error: error.response.data,
+                        additional_error: fetch_error.response.data,
                       });
                     });
                 }
@@ -63,7 +68,10 @@ router.post('/', (req, res) => {
         );
       })
       .catch((err) => {
-        console.log(err);
+        res.status(500).json({
+          success: false,
+          err,
+        });
       });
   } else {
     res.status(401).json({

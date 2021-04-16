@@ -1,65 +1,69 @@
 const express = require('express');
+
 const router = express.Router();
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const originCheck = require('../../helpers/checkOrigin');
 const db = require('../../helpers/mongo');
 
-//Model
+// Model
 const Author = require('../../models/author');
 
 router.post('/set', (req, res) => {
   if (originCheck(req.headers.origin)) {
-    let pass = req.body.pass;
-    if (pass && pass == process.env.POSTPASS) {
+    const { pass } = req.body;
+    if (pass && pass === process.env.POSTPASS) {
       db.connect()
         .then(() => {
-          let author = req.body.author;
+          const { author } = req.body;
           if (author.email) {
-            Author.findOne({ email: author.email }, (error, foundAuthor) => {
-              if (!error && foundAuthor == null && author.password) {
-                bcrypt.hash(author.password, 11, (error, hashedPass) => {
-                  if (!error && hashedPass) {
-                    let newAuthor = new Author({
-                      name: author.name,
-                      email: author.email,
-                      github: author.github,
-                      password: hashedPass,
-                    });
-                    newAuthor.save((error, doc) => {
-                      if (!error && doc) {
-                        res.status(200).json({
-                          success: true,
-                          message: 'Succesfully Added Author',
-                          doc,
-                        });
-                        db.close();
-                      } else {
-                        res.status(500).json({
-                          success: false,
-                          error,
-                          message:
-                            'Error While Saving the Document, Please Try Again Later',
-                        });
-                        db.close();
-                      }
-                    });
-                  } else {
-                    res.status(500).json({
-                      success: false,
-                      message: 'Error While Generating Hash',
-                    });
-                    db.close();
-                  }
-                });
-              } else {
-                res.status(404).json({
-                  success: false,
-                  message: 'User is Already There',
-                });
-                db.close();
-              }
-            });
+            Author.findOne(
+              { email: author.email },
+              (doc_error, foundAuthor) => {
+                if (!doc_error && foundAuthor == null && author.password) {
+                  bcrypt.hash(author.password, 11, (hash_error, hashedPass) => {
+                    if (!hash_error && hashedPass) {
+                      const newAuthor = new Author({
+                        name: author.name,
+                        email: author.email,
+                        github: author.github,
+                        password: hashedPass,
+                      });
+                      newAuthor.save((error, doc) => {
+                        if (!error && doc) {
+                          res.status(200).json({
+                            success: true,
+                            message: 'Succesfully Added Author',
+                            doc,
+                          });
+                          db.close();
+                        } else {
+                          res.status(500).json({
+                            success: false,
+                            error,
+                            message:
+                              'Error While Saving the Document, Please Try Again Later',
+                          });
+                          db.close();
+                        }
+                      });
+                    } else {
+                      res.status(500).json({
+                        success: false,
+                        message: 'Error While Generating Hash',
+                      });
+                      db.close();
+                    }
+                  });
+                } else {
+                  res.status(404).json({
+                    success: false,
+                    message: 'User is Already There',
+                  });
+                  db.close();
+                }
+              },
+            );
           } else {
             res.status(401).json({
               success: false,
@@ -88,23 +92,23 @@ router.post('/set', (req, res) => {
 
 router.post('/sign', (req, res) => {
   if (originCheck(req.headers.origin)) {
-    let creds = req.body.creds;
+    const { creds } = req.body;
     if (creds && creds.email && creds.password) {
       db.connect()
         .then(() => {
-          Author.findOne({ email: creds.email }, (error, auth) => {
-            if (!error && auth) {
+          Author.findOne({ email: creds.email }, (doc_error, auth) => {
+            if (!doc_error && auth) {
               bcrypt.compare(
                 creds.password,
                 auth.password,
-                (error, passedTest) => {
-                  if (!error && passedTest) {
+                (hash_error, passedTest) => {
+                  if (!hash_error && passedTest) {
                     jwt.sign(
                       { auth },
                       process.env.HASHPASS,
                       { expiresIn: 31536000 },
-                      (error, token) => {
-                        if (!error && token) {
+                      (sign_error, token) => {
+                        if (!sign_error && token) {
                           res.status(200).json({
                             success: true,
                             token,
@@ -114,7 +118,7 @@ router.post('/sign', (req, res) => {
                         } else {
                           res.status(500).json({
                             success: false,
-                            error,
+                            sign_error,
                             message: 'Generation of Web Token Failed',
                           });
                           db.close();
@@ -124,7 +128,7 @@ router.post('/sign', (req, res) => {
                   } else {
                     res.status(401).json({
                       success: false,
-                      error,
+                      hash_error,
                       message: 'Enter the Password Correctly',
                     });
                     db.close();
@@ -134,7 +138,7 @@ router.post('/sign', (req, res) => {
             } else {
               res.status(404).json({
                 success: false,
-                error,
+                doc_error,
                 message: 'Unable to Find the Author with the Email',
               });
               db.close();

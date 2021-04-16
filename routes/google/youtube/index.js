@@ -1,4 +1,5 @@
 const express = require('express');
+
 const router = express.Router();
 const axios = require('axios');
 
@@ -10,29 +11,23 @@ const origin_check = require('../../../helpers/checkOrigin');
 // Model
 const Tokens = require('../../../models/tokens');
 
-let youtube_base_api = 'https://youtube.googleapis.com/youtube/v3/';
-let youtube_api_paths = {
+const youtube_base_api = 'https://youtube.googleapis.com/youtube/v3/';
+const youtube_api_paths = {
   my_videos: {
     url: (part, maxResults) =>
-      youtube_base_api +
-      `search?part=${part}&forMine=true&maxResults=${maxResults}&type=video`,
-    headers: (token) => {
-      return {
-        Authorization: `Bearer ${token}`,
-        Accept: 'application/json',
-      };
-    },
+      `${youtube_base_api}search?part=${part}&forMine=true&maxResults=${maxResults}&type=video`,
+    headers: (token) => ({
+      Authorization: `Bearer ${token}`,
+      Accept: 'application/json',
+    }),
   },
   channel_data: {
     url: (channel_id) =>
-      youtube_base_api +
-      `channels?part=snippet%2CcontentDetails%2Cstatistics&id=${channel_id}`,
-    headers: (token) => {
-      return {
-        Authorization: `Bearer ${token}`,
-        Accept: 'application/json',
-      };
-    },
+      `${youtube_base_api}channels?part=snippet%2CcontentDetails%2Cstatistics&id=${channel_id}`,
+    headers: (token) => ({
+      Authorization: `Bearer ${token}`,
+      Accept: 'application/json',
+    }),
   },
 };
 
@@ -46,41 +41,37 @@ router.post('/videos', async (req, res) => {
           scope: 'https://www.googleapis.com/auth/youtube.readonly',
         })
           .sort({ time: -1 })
-          .exec(async (err, access_tokens) => {
-            if (!err && access_tokens) {
-              if (access_tokens.length == 0) {
+          .exec(async (doc_error, access_tokens) => {
+            if (!doc_error && access_tokens) {
+              if (access_tokens.length === 0) {
                 Tokens.find({
                   website: 'google.com',
                   type: 'refresh',
                   scope: 'https://www.googleapis.com/auth/youtube.readonly',
                 })
                   .sort({ time: -1 })
-                  .exec(async (err, refresh_tokens) => {
-                    if (!err && refresh_tokens) {
+                  .exec(async (refresh_error, refresh_tokens) => {
+                    if (!refresh_error && refresh_tokens) {
                       if (refresh_tokens.length > 0) {
-                        let refresh_token = refresh_tokens[0];
-                        let client_id = refresh_token.additional_tokens.filter(
-                          (tokens) => {
-                            return tokens.type == 'client_id';
-                          },
+                        const refresh_token = refresh_tokens[0];
+                        const client_id = refresh_token.additional_tokens.filter(
+                          (tokens) => tokens.type === 'client_id',
                         )[0];
-                        let client_secret = refresh_token.additional_tokens.filter(
-                          (tokens) => {
-                            return tokens.type == 'client_secret';
-                          },
+                        const client_secret = refresh_token.additional_tokens.filter(
+                          (tokens) => tokens.type === 'client_secret',
                         )[0];
-                        let token_response = await gen_token(
+                        const token_response = await gen_token(
                           client_id.token,
                           client_secret.token,
                           refresh_token.token,
                         );
                         if (token_response.success && !token_response.error) {
-                          let token_integrity = await check_token(
+                          const token_integrity = await check_token(
                             'access_token',
                             token_response.access_token,
                           );
                           if (token_integrity.success) {
-                            let new_access_token = new Tokens({
+                            const new_access_token = new Tokens({
                               token: token_response.access_token,
                               type: 'access',
                               time: Date.now(),
@@ -89,8 +80,8 @@ router.post('/videos', async (req, res) => {
                               scope: token_response.scope,
                             });
                             new_access_token.save(
-                              async (error, access_token) => {
-                                if (!error && access_token) {
+                              async (save_error, access_token) => {
+                                if (!save_error && access_token) {
                                   axios
                                     .get(
                                       youtube_api_paths.my_videos.url(
@@ -105,7 +96,7 @@ router.post('/videos', async (req, res) => {
                                     )
                                     .then((response) => {
                                       if (
-                                        response.status == 200 &&
+                                        response.status === 200 &&
                                         response.data
                                       ) {
                                         res.status(200).json({
@@ -125,7 +116,7 @@ router.post('/videos', async (req, res) => {
                                     .catch((error) => {
                                       res.status(500).json({
                                         success: false,
-                                        error: error,
+                                        error,
                                         data: null,
                                       });
                                     });
@@ -165,8 +156,8 @@ router.post('/videos', async (req, res) => {
                     }
                   });
               } else {
-                let old_access_token = access_tokens[0];
-                let current_time = Date.now();
+                const old_access_token = access_tokens[0];
+                const current_time = Date.now();
                 if (current_time > old_access_token.expires_in) {
                   Tokens.deleteOne(old_access_token, (error) => {
                     if (!error) {
@@ -180,18 +171,14 @@ router.post('/videos', async (req, res) => {
                         .exec(async (err, refresh_tokens) => {
                           if (!err && refresh_tokens) {
                             if (refresh_tokens.length > 0) {
-                              let refresh_token = refresh_tokens[0];
-                              let client_id = refresh_token.additional_tokens.filter(
-                                (tokens) => {
-                                  return tokens.type == 'client_id';
-                                },
+                              const refresh_token = refresh_tokens[0];
+                              const client_id = refresh_token.additional_tokens.filter(
+                                (tokens) => tokens.type === 'client_id',
                               )[0];
-                              let client_secret = refresh_token.additional_tokens.filter(
-                                (tokens) => {
-                                  return tokens.type == 'client_secret';
-                                },
+                              const client_secret = refresh_token.additional_tokens.filter(
+                                (tokens) => tokens.type === 'client_secret',
                               )[0];
-                              let token_response = await gen_token(
+                              const token_response = await gen_token(
                                 client_id.token,
                                 client_secret.token,
                                 refresh_token.token,
@@ -200,12 +187,12 @@ router.post('/videos', async (req, res) => {
                                 token_response.success &&
                                 !token_response.error
                               ) {
-                                let token_integrity = await check_token(
+                                const token_integrity = await check_token(
                                   'access_token',
                                   token_response.access_token,
                                 );
                                 if (token_integrity.success) {
-                                  let new_access_token = new Tokens({
+                                  const new_access_token = new Tokens({
                                     token: token_response.access_token,
                                     type: 'access',
                                     time: Date.now(),
@@ -214,8 +201,8 @@ router.post('/videos', async (req, res) => {
                                     scope: token_response.scope,
                                   });
                                   new_access_token.save(
-                                    async (error, access_token) => {
-                                      if (!error && access_token) {
+                                    async (save_error, access_token) => {
+                                      if (!save_error && access_token) {
                                         axios
                                           .get(
                                             youtube_api_paths.my_videos.url(
@@ -230,7 +217,7 @@ router.post('/videos', async (req, res) => {
                                           )
                                           .then((response) => {
                                             if (
-                                              response.status == 200 &&
+                                              response.status === 200 &&
                                               response.data
                                             ) {
                                               res.status(200).json({
@@ -247,10 +234,10 @@ router.post('/videos', async (req, res) => {
                                               });
                                             }
                                           })
-                                          .catch((error) => {
+                                          .catch((fetch_error) => {
                                             res.status(500).json({
                                               success: false,
-                                              error: error,
+                                              error: fetch_error,
                                               data: null,
                                             });
                                           });
@@ -300,7 +287,7 @@ router.post('/videos', async (req, res) => {
                     }
                   });
                 } else {
-                  let old_token_integrity = await check_token(
+                  const old_token_integrity = await check_token(
                     'access_token',
                     old_access_token.token,
                   );
@@ -312,7 +299,7 @@ router.post('/videos', async (req, res) => {
                         ),
                       })
                       .then((response) => {
-                        if (response.status == 200 && response.data) {
+                        if (response.status === 200 && response.data) {
                           res.status(200).json({
                             success: true,
                             error: null,
@@ -329,7 +316,7 @@ router.post('/videos', async (req, res) => {
                       .catch((error) => {
                         res.status(500).json({
                           success: false,
-                          error: error,
+                          error,
                           data: null,
                         });
                       });
@@ -346,18 +333,14 @@ router.post('/videos', async (req, res) => {
                           .exec(async (err, refresh_tokens) => {
                             if (!err && refresh_tokens) {
                               if (refresh_tokens.length > 0) {
-                                let refresh_token = refresh_tokens[0];
-                                let client_id = refresh_token.additional_tokens.filter(
-                                  (tokens) => {
-                                    return tokens.type == 'client_id';
-                                  },
+                                const refresh_token = refresh_tokens[0];
+                                const client_id = refresh_token.additional_tokens.filter(
+                                  (tokens) => tokens.type === 'client_id',
                                 )[0];
-                                let client_secret = refresh_token.additional_tokens.filter(
-                                  (tokens) => {
-                                    return tokens.type == 'client_secret';
-                                  },
+                                const client_secret = refresh_token.additional_tokens.filter(
+                                  (tokens) => tokens.type === 'client_secret',
                                 )[0];
-                                let token_response = await gen_token(
+                                const token_response = await gen_token(
                                   client_id.token,
                                   client_secret.token,
                                   refresh_token.token,
@@ -366,12 +349,12 @@ router.post('/videos', async (req, res) => {
                                   token_response.success &&
                                   !token_response.error
                                 ) {
-                                  let token_integrity = await check_token(
+                                  const token_integrity = await check_token(
                                     'access_token',
                                     token_response.access_token,
                                   );
                                   if (token_integrity.success) {
-                                    let new_access_token = new Tokens({
+                                    const new_access_token = new Tokens({
                                       token: token_response.access_token,
                                       type: 'access',
                                       time: Date.now(),
@@ -380,8 +363,8 @@ router.post('/videos', async (req, res) => {
                                       scope: token_response.scope,
                                     });
                                     new_access_token.save(
-                                      async (error, access_token) => {
-                                        if (!error && access_token) {
+                                      async (save_error, access_token) => {
+                                        if (!save_error && access_token) {
                                           axios
                                             .get(
                                               youtube_api_paths.my_videos.url(
@@ -396,7 +379,7 @@ router.post('/videos', async (req, res) => {
                                             )
                                             .then((response) => {
                                               if (
-                                                response.status == 200 &&
+                                                response.status === 200 &&
                                                 response.data
                                               ) {
                                                 res.status(200).json({
@@ -413,10 +396,10 @@ router.post('/videos', async (req, res) => {
                                                 });
                                               }
                                             })
-                                            .catch((error) => {
+                                            .catch((fetch_error) => {
                                               res.status(500).json({
                                                 success: false,
-                                                error: error,
+                                                error: fetch_error,
                                                 data: null,
                                               });
                                             });
@@ -493,7 +476,7 @@ router.post('/videos', async (req, res) => {
 
 router.post('/channel-data', async (req, res) => {
   if (origin_check(req.headers.origin)) {
-    let channel_id = req.body.channel_id;
+    const { channel_id } = req.body;
     if (channel_id) {
       db.connect()
         .then(() => {
@@ -503,41 +486,37 @@ router.post('/channel-data', async (req, res) => {
             scope: 'https://www.googleapis.com/auth/youtube.readonly',
           })
             .sort({ time: -1 })
-            .exec(async (err, access_tokens) => {
-              if (!err && access_tokens) {
-                if (access_tokens.length == 0) {
+            .exec(async (doc_error, access_tokens) => {
+              if (!doc_error && access_tokens) {
+                if (access_tokens.length === 0) {
                   Tokens.find({
                     website: 'google.com',
                     type: 'refresh',
                     scope: 'https://www.googleapis.com/auth/youtube.readonly',
                   })
                     .sort({ time: -1 })
-                    .exec(async (err, refresh_tokens) => {
-                      if (!err && refresh_tokens) {
+                    .exec(async (refresh_error, refresh_tokens) => {
+                      if (!refresh_error && refresh_tokens) {
                         if (refresh_tokens.length > 0) {
-                          let refresh_token = refresh_tokens[0];
-                          let client_id = refresh_token.additional_tokens.filter(
-                            (tokens) => {
-                              return tokens.type == 'client_id';
-                            },
+                          const refresh_token = refresh_tokens[0];
+                          const client_id = refresh_token.additional_tokens.filter(
+                            (tokens) => tokens.type === 'client_id',
                           )[0];
-                          let client_secret = refresh_token.additional_tokens.filter(
-                            (tokens) => {
-                              return tokens.type == 'client_secret';
-                            },
+                          const client_secret = refresh_token.additional_tokens.filter(
+                            (tokens) => tokens.type === 'client_secret',
                           )[0];
-                          let token_response = await gen_token(
+                          const token_response = await gen_token(
                             client_id.token,
                             client_secret.token,
                             refresh_token.token,
                           );
                           if (token_response.success && !token_response.error) {
-                            let token_integrity = await check_token(
+                            const token_integrity = await check_token(
                               'access_token',
                               token_response.access_token,
                             );
                             if (token_integrity.success) {
-                              let new_access_token = new Tokens({
+                              const new_access_token = new Tokens({
                                 token: token_response.access_token,
                                 type: 'access',
                                 time: Date.now(),
@@ -561,7 +540,7 @@ router.post('/channel-data', async (req, res) => {
                                       )
                                       .then((response) => {
                                         if (
-                                          response.status == 200 &&
+                                          response.status === 200 &&
                                           response.data
                                         ) {
                                           res.status(200).json({
@@ -578,10 +557,10 @@ router.post('/channel-data', async (req, res) => {
                                           });
                                         }
                                       })
-                                      .catch((error) => {
+                                      .catch((fetch_error) => {
                                         res.status(500).json({
                                           success: false,
-                                          error: error,
+                                          error: fetch_error,
                                           data: null,
                                         });
                                       });
@@ -621,8 +600,8 @@ router.post('/channel-data', async (req, res) => {
                       }
                     });
                 } else {
-                  let old_access_token = access_tokens[0];
-                  let current_time = Date.now();
+                  const old_access_token = access_tokens[0];
+                  const current_time = Date.now();
                   if (current_time > old_access_token.expires_in) {
                     Tokens.deleteOne(old_access_token, (error) => {
                       if (!error) {
@@ -636,18 +615,14 @@ router.post('/channel-data', async (req, res) => {
                           .exec(async (err, refresh_tokens) => {
                             if (!err && refresh_tokens) {
                               if (refresh_tokens.length > 0) {
-                                let refresh_token = refresh_tokens[0];
-                                let client_id = refresh_token.additional_tokens.filter(
-                                  (tokens) => {
-                                    return tokens.type == 'client_id';
-                                  },
+                                const refresh_token = refresh_tokens[0];
+                                const client_id = refresh_token.additional_tokens.filter(
+                                  (tokens) => tokens.type === 'client_id',
                                 )[0];
-                                let client_secret = refresh_token.additional_tokens.filter(
-                                  (tokens) => {
-                                    return tokens.type == 'client_secret';
-                                  },
+                                const client_secret = refresh_token.additional_tokens.filter(
+                                  (tokens) => tokens.type === 'client_secret',
                                 )[0];
-                                let token_response = await gen_token(
+                                const token_response = await gen_token(
                                   client_id.token,
                                   client_secret.token,
                                   refresh_token.token,
@@ -656,12 +631,12 @@ router.post('/channel-data', async (req, res) => {
                                   token_response.success &&
                                   !token_response.error
                                 ) {
-                                  let token_integrity = await check_token(
+                                  const token_integrity = await check_token(
                                     'access_token',
                                     token_response.access_token,
                                   );
                                   if (token_integrity.success) {
-                                    let new_access_token = new Tokens({
+                                    const new_access_token = new Tokens({
                                       token: token_response.access_token,
                                       type: 'access',
                                       time: Date.now(),
@@ -670,8 +645,8 @@ router.post('/channel-data', async (req, res) => {
                                       scope: token_response.scope,
                                     });
                                     new_access_token.save(
-                                      async (error, access_token) => {
-                                        if (!error && access_token) {
+                                      async (save_error, access_token) => {
+                                        if (!save_error && access_token) {
                                           axios
                                             .get(
                                               youtube_api_paths.channel_data.url(
@@ -685,7 +660,7 @@ router.post('/channel-data', async (req, res) => {
                                             )
                                             .then((response) => {
                                               if (
-                                                response.status == 200 &&
+                                                response.status === 200 &&
                                                 response.data
                                               ) {
                                                 res.status(200).json({
@@ -702,10 +677,10 @@ router.post('/channel-data', async (req, res) => {
                                                 });
                                               }
                                             })
-                                            .catch((error) => {
+                                            .catch((fetch_error) => {
                                               res.status(500).json({
                                                 success: false,
-                                                error: error,
+                                                error: fetch_error,
                                                 data: null,
                                               });
                                             });
@@ -756,7 +731,7 @@ router.post('/channel-data', async (req, res) => {
                       }
                     });
                   } else {
-                    let old_token_integrity = await check_token(
+                    const old_token_integrity = await check_token(
                       'access_token',
                       old_access_token.token,
                     );
@@ -768,7 +743,7 @@ router.post('/channel-data', async (req, res) => {
                           ),
                         })
                         .then((response) => {
-                          if (response.status == 200 && response.data) {
+                          if (response.status === 200 && response.data) {
                             res.status(200).json({
                               success: true,
                               error: null,
@@ -782,10 +757,10 @@ router.post('/channel-data', async (req, res) => {
                             });
                           }
                         })
-                        .catch((error) => {
+                        .catch((fetch_error) => {
                           res.status(500).json({
                             success: false,
-                            error: error,
+                            error: fetch_error,
                             data: null,
                           });
                         });
@@ -802,18 +777,14 @@ router.post('/channel-data', async (req, res) => {
                             .exec(async (err, refresh_tokens) => {
                               if (!err && refresh_tokens) {
                                 if (refresh_tokens.length > 0) {
-                                  let refresh_token = refresh_tokens[0];
-                                  let client_id = refresh_token.additional_tokens.filter(
-                                    (tokens) => {
-                                      return tokens.type == 'client_id';
-                                    },
+                                  const refresh_token = refresh_tokens[0];
+                                  const client_id = refresh_token.additional_tokens.filter(
+                                    (tokens) => tokens.type === 'client_id',
                                   )[0];
-                                  let client_secret = refresh_token.additional_tokens.filter(
-                                    (tokens) => {
-                                      return tokens.type == 'client_secret';
-                                    },
+                                  const client_secret = refresh_token.additional_tokens.filter(
+                                    (tokens) => tokens.type === 'client_secret',
                                   )[0];
-                                  let token_response = await gen_token(
+                                  const token_response = await gen_token(
                                     client_id.token,
                                     client_secret.token,
                                     refresh_token.token,
@@ -822,12 +793,12 @@ router.post('/channel-data', async (req, res) => {
                                     token_response.success &&
                                     !token_response.error
                                   ) {
-                                    let token_integrity = await check_token(
+                                    const token_integrity = await check_token(
                                       'access_token',
                                       token_response.access_token,
                                     );
                                     if (token_integrity.success) {
-                                      let new_access_token = new Tokens({
+                                      const new_access_token = new Tokens({
                                         token: token_response.access_token,
                                         type: 'access',
                                         time: Date.now(),
@@ -836,8 +807,8 @@ router.post('/channel-data', async (req, res) => {
                                         scope: token_response.scope,
                                       });
                                       new_access_token.save(
-                                        async (error, access_token) => {
-                                          if (!error && access_token) {
+                                        async (save_error, access_token) => {
+                                          if (!save_error && access_token) {
                                             axios
                                               .get(
                                                 youtube_api_paths.channel_data.url(
@@ -851,7 +822,7 @@ router.post('/channel-data', async (req, res) => {
                                               )
                                               .then((response) => {
                                                 if (
-                                                  response.status == 200 &&
+                                                  response.status === 200 &&
                                                   response.data
                                                 ) {
                                                   res.status(200).json({
@@ -868,10 +839,10 @@ router.post('/channel-data', async (req, res) => {
                                                   });
                                                 }
                                               })
-                                              .catch((error) => {
+                                              .catch((fetch_error) => {
                                                 res.status(500).json({
                                                   success: false,
-                                                  error: error,
+                                                  error: fetch_error,
                                                   data: null,
                                                 });
                                               });

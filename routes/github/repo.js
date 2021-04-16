@@ -1,75 +1,76 @@
 const express = require('express');
+
 const router = express.Router();
 const axios = require('axios');
 
-//Local
+// Local
 const db = require('../../helpers/mongo');
 const { gh_headers } = require('../../helpers/github-oauth');
 const originCheck = require('../../helpers/checkOrigin');
 const api = require('./api');
 
-//Models
+// Models
 const Tokens = require('../../models/tokens');
 
 router.post('/list', (req, res) => {
   if (originCheck(req.headers.origin)) {
-    let user = req.body.user;
+    const { user } = req.body;
     if (user) {
+      db.connect()
+        .then(() => {
+          Tokens.findOne(
+            {
+              type: 'access',
+              website: 'github.com',
+              scope: 'read:user,read:discussion,read:packages,public_repo',
+            },
+            (doc_error, access_token) => {
+              if (!doc_error && access_token) {
+                axios
+                  .get(api.repo.list(user), {
+                    headers: gh_headers(access_token.token),
+                  })
+                  .then((response) => {
+                    if (response.status === 200 && response.data) {
+                      res.status(200).json({
+                        success: true,
+                        repos: response.data,
+                      });
+                    } else {
+                      res.status(500).json({
+                        success: false,
+                        error: 'Not able to fetch Repo List',
+                      });
+                    }
+                  })
+                  .catch((error) => {
+                    res.status(500).json({
+                      success: false,
+                      error,
+                    });
+                  });
+              } else {
+                res.status(500).json({
+                  success: false,
+                  error: 'Unable to fetch Access Token',
+                  additional_error: doc_error,
+                });
+              }
+            },
+          );
+        })
+        .catch((error) => {
+          res.status(500).json({
+            success: false,
+            error,
+          });
+        });
     } else {
       res.status(404).json({
         success: false,
         error: 'Required Detail Not Sent - username',
       });
     }
-    db.connect()
-      .then(() => {
-        Tokens.findOne(
-          {
-            type: 'access',
-            website: 'github.com',
-            scope: 'read:user,read:discussion,read:packages,public_repo',
-          },
-          (error, access_token) => {
-            if (!error && access_token) {
-              axios
-                .get(api.repo.list(user), {
-                  headers: gh_headers(access_token.token),
-                })
-                .then((response) => {
-                  if (response.status == 200 && response.data) {
-                    res.status(200).json({
-                      success: true,
-                      repos: response.data,
-                    });
-                  } else {
-                    res.status(500).json({
-                      success: false,
-                      error: 'Not able to fetch Repo List',
-                    });
-                  }
-                })
-                .catch((error) => {
-                  res.status(500).json({
-                    success: false,
-                    error: error,
-                  });
-                });
-            } else {
-              res.status(500).json({
-                success: false,
-                error: 'Unable to fetch Access Token',
-                additional_error: error,
-              });
-            }
-          },
-        );
-      })
-      .catch((error) => {
-        res.status(500).json({
-          success: false,
-          error,
-        });
-      });
   } else {
     res.status(401).json({
       success: false,
@@ -80,8 +81,8 @@ router.post('/list', (req, res) => {
 
 router.post('/data', (req, res) => {
   if (originCheck(req.headers.origin)) {
-    let user = req.body.user;
-    let repo = req.body.repo;
+    const { user } = req.body;
+    const { repo } = req.body;
     if (user && repo) {
       db.connect()
         .then(() => {
@@ -91,14 +92,14 @@ router.post('/data', (req, res) => {
               website: 'github.com',
               scope: 'read:user,read:discussion,read:packages,public_repo',
             },
-            (error, access_token) => {
-              if (!error && access_token) {
+            (doc_error, access_token) => {
+              if (!doc_error && access_token) {
                 axios
                   .get(api.repo.data(user, repo), {
                     headers: gh_headers(access_token.token),
                   })
                   .then((response) => {
-                    if (response.status == 200 && response.data) {
+                    if (response.status === 200 && response.data) {
                       res.status(200).json({
                         success: true,
                         ...response.data,
@@ -113,14 +114,14 @@ router.post('/data', (req, res) => {
                   .catch((error) => {
                     res.status(500).json({
                       success: false,
-                      error: error,
+                      error,
                     });
                   });
               } else {
                 res.status(500).json({
                   success: false,
                   error: 'Unable to fetch Access Token',
-                  additional_error: error,
+                  additional_error: doc_error,
                 });
               }
             },
@@ -148,8 +149,8 @@ router.post('/data', (req, res) => {
 
 router.post('/branches', (req, res) => {
   if (originCheck(req.headers.origin)) {
-    let user = req.body.user;
-    let repo = req.body.repo;
+    const { user } = req.body;
+    const { repo } = req.body;
     if (user && repo) {
       db.connect()
         .then(() => {
@@ -159,14 +160,14 @@ router.post('/branches', (req, res) => {
               website: 'github.com',
               scope: 'read:user,read:discussion,read:packages,public_repo',
             },
-            (error, access_token) => {
-              if (!error && access_token) {
+            (doc_error, access_token) => {
+              if (!doc_error && access_token) {
                 axios
                   .get(api.repo.branches(user, repo), {
                     headers: gh_headers(access_token.token),
                   })
                   .then((response) => {
-                    if (response.status == 200 && response.data) {
+                    if (response.status === 200 && response.data) {
                       res.status(200).json({
                         success: true,
                         branches: response.data,
@@ -181,14 +182,14 @@ router.post('/branches', (req, res) => {
                   .catch((error) => {
                     res.status(500).json({
                       success: false,
-                      error: error,
+                      error,
                     });
                   });
               } else {
                 res.status(500).json({
                   success: false,
                   error: 'Unable to fetch Access Token',
-                  additional_error: error,
+                  additional_error: doc_error,
                 });
               }
             },
@@ -216,11 +217,11 @@ router.post('/branches', (req, res) => {
 
 router.post('/commits', (req, res) => {
   if (originCheck(req.headers.origin)) {
-    let user = req.body.user;
-    let repo = req.body.repo;
-    let branch = req.body.branch;
-    let nos = req.body.nos;
-    let page = req.body.page;
+    const { user } = req.body;
+    const { repo } = req.body;
+    const { branch } = req.body;
+    const { nos } = req.body;
+    const { page } = req.body;
     if (user && repo && branch && nos && page) {
       db.connect()
         .then(() => {
@@ -230,19 +231,19 @@ router.post('/commits', (req, res) => {
               website: 'github.com',
               scope: 'read:user,read:discussion,read:packages,public_repo',
             },
-            (error, access_token) => {
-              if (!error && access_token) {
+            (doc_error, access_token) => {
+              if (!doc_error && access_token) {
                 axios
                   .get(api.repo.commits(user, repo), {
                     headers: gh_headers(access_token.token),
                     params: {
                       sha: branch,
                       per_page: nos,
-                      page: page,
+                      page,
                     },
                   })
                   .then((response) => {
-                    if (response.status == 200 && response.data) {
+                    if (response.status === 200 && response.data) {
                       res.status(200).json({
                         success: true,
                         commits: response.data,
@@ -257,14 +258,14 @@ router.post('/commits', (req, res) => {
                   .catch((error) => {
                     res.status(500).json({
                       success: false,
-                      error: error,
+                      error,
                     });
                   });
               } else {
                 res.status(500).json({
                   success: false,
                   error: 'Unable to fetch Access Token',
-                  additional_error: error,
+                  additional_error: doc_error,
                 });
               }
             },
@@ -292,8 +293,8 @@ router.post('/commits', (req, res) => {
 
 router.post('/topics', (req, res) => {
   if (originCheck(req.headers.origin)) {
-    let user = req.body.user;
-    let repo = req.body.repo;
+    const { user } = req.body;
+    const { repo } = req.body;
     if (user && repo) {
       db.connect()
         .then(() => {
@@ -303,8 +304,8 @@ router.post('/topics', (req, res) => {
               website: 'github.com',
               scope: 'read:user,read:discussion,read:packages,public_repo',
             },
-            (error, access_token) => {
-              if (!error && access_token) {
+            (doc_error, access_token) => {
+              if (!doc_error && access_token) {
                 axios
                   .get(api.repo.topics(user, repo), {
                     headers: {
@@ -313,7 +314,7 @@ router.post('/topics', (req, res) => {
                     },
                   })
                   .then((response) => {
-                    if (response.status == 200 && response.data) {
+                    if (response.status === 200 && response.data) {
                       res.status(200).json({
                         success: true,
                         ...response.data,
@@ -328,14 +329,14 @@ router.post('/topics', (req, res) => {
                   .catch((error) => {
                     res.status(500).json({
                       success: false,
-                      error: error,
+                      error,
                     });
                   });
               } else {
                 res.status(500).json({
                   success: false,
                   error: 'Unable to fetch Access Token',
-                  additional_error: error,
+                  additional_error: doc_error,
                 });
               }
             },
@@ -363,10 +364,10 @@ router.post('/topics', (req, res) => {
 
 router.post('/contents', (req, res) => {
   if (originCheck(req.headers.origin)) {
-    let user = req.body.user;
-    let repo = req.body.repo;
-    let path = req.body.path;
-    let branch = req.body.branch;
+    const { user } = req.body;
+    const { repo } = req.body;
+    const { path } = req.body;
+    const { branch } = req.body;
     if (user && repo && path && branch) {
       db.connect()
         .then(() => {
@@ -376,8 +377,8 @@ router.post('/contents', (req, res) => {
               website: 'github.com',
               scope: 'read:user,read:discussion,read:packages,public_repo',
             },
-            (error, access_token) => {
-              if (!error && access_token) {
+            (doc_error, access_token) => {
+              if (!doc_error && access_token) {
                 axios
                   .get(api.repo.contents(user, repo, path), {
                     headers: gh_headers(access_token.token),
@@ -386,7 +387,7 @@ router.post('/contents', (req, res) => {
                     },
                   })
                   .then((response) => {
-                    if (response.status == 200 && response.data) {
+                    if (response.status === 200 && response.data) {
                       res.status(200).json({
                         success: true,
                         contents: response.data,
@@ -401,14 +402,14 @@ router.post('/contents', (req, res) => {
                   .catch((error) => {
                     res.status(500).json({
                       success: false,
-                      error: error,
+                      error,
                     });
                   });
               } else {
                 res.status(500).json({
                   success: false,
                   error: 'Unable to fetch Access Token',
-                  additional_error: error,
+                  additional_error: doc_error,
                 });
               }
             },

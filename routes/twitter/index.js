@@ -1,13 +1,14 @@
 const axios = require('axios');
 const express = require('express');
+
 const router = express.Router();
 
-//Local
+// Local
 const db = require('../../helpers/mongo');
 const originCheck = require('../../helpers/checkOrigin');
 const api = require('./api');
 
-//Models
+// Models
 const Tokens = require('../../models/tokens');
 
 router.post('/tweets', (req, res) => {
@@ -20,10 +21,10 @@ router.post('/tweets', (req, res) => {
             website: 'twitter.com',
             scope: 'read_user,read_tweets',
           },
-          (error, access_token) => {
-            let user_id = access_token.additional_tokens.filter((token) => {
-              return token.type == 'user_id';
-            })[0];
+          (_error, access_token) => {
+            const user_id = access_token.additional_tokens.filter(
+              (token) => token.type === 'user_id',
+            )[0];
             axios
               .get(api.users.tweets(user_id.token), {
                 headers: {

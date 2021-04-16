@@ -1,11 +1,12 @@
 const express = require('express');
+
 const router = express.Router();
 
-//Local
+// Local
 const db = require('../../helpers/mongo');
 const { get_auth_code_url, gen_token } = require('../../helpers/github-oauth');
 
-//Models
+// Models
 const Tokens = require('../../models/tokens');
 
 router.get('/oauth', async (req, res) => {
@@ -19,12 +20,12 @@ router.get('/oauth', async (req, res) => {
         },
         async (error, client_details) => {
           if (!error && client_details) {
-            let client_secret = client_details;
-            let client_id = client_details.additional_tokens.filter((token) => {
-              return token.type == 'client_id';
-            })[0];
+            const client_secret = client_details;
+            const client_id = client_details.additional_tokens.filter(
+              (token) => token.type === 'client_id',
+            )[0];
             if (req.query && req.query.code) {
-              let token_response = await gen_token(
+              const token_response = await gen_token(
                 client_id.token,
                 client_secret.token,
                 req.query.code,
@@ -37,15 +38,15 @@ router.get('/oauth', async (req, res) => {
                     scope:
                       'read:user,read:discussion,read:packages,public_repo',
                   },
-                  (error, old_access_token) => {
+                  (doc_error, old_access_token) => {
                     if (
-                      !error &&
+                      !doc_error &&
                       old_access_token &&
                       old_access_token.length > 0
                     ) {
-                      Tokens.deleteOne(old_access_token[0], (error) => {
-                        if (!error) {
-                          let new_access_token = Tokens({
+                      Tokens.deleteOne(old_access_token[0], (del_error) => {
+                        if (!del_error) {
+                          const new_access_token = Tokens({
                             token: token_response.access_token,
                             type: 'access',
                             time: Date.now(),
@@ -54,8 +55,8 @@ router.get('/oauth', async (req, res) => {
                             scope:
                               'read:user,read:discussion,read:packages,public_repo',
                           });
-                          new_access_token.save((error, new_token) => {
-                            if (!error && new_token) {
+                          new_access_token.save((save_error, new_token) => {
+                            if (!save_error && new_token) {
                               res.status(200).json({
                                 success: true,
                                 message: 'Successfully Saved new Access token',
@@ -66,7 +67,7 @@ router.get('/oauth', async (req, res) => {
                               res.status(500).json({
                                 success: false,
                                 error: 'Error while Saving the New Token',
-                                additional_error: error,
+                                additional_error: save_error,
                               });
                             }
                           });
@@ -74,12 +75,12 @@ router.get('/oauth', async (req, res) => {
                           res.status(500).json({
                             success: false,
                             error: 'Not ablt to Delete Old Tokens',
-                            additional_error: error,
+                            additional_error: del_error,
                           });
                         }
                       });
                     } else {
-                      let new_access_token = Tokens({
+                      const new_access_token = Tokens({
                         token: token_response.access_token,
                         type: 'access',
                         time: Date.now(),
@@ -88,7 +89,7 @@ router.get('/oauth', async (req, res) => {
                         scope:
                           'read:user,read:discussion,read:packages,public_repo',
                       });
-                      new_access_token.save((error, new_token) => {
+                      new_access_token.save((save_error, new_token) => {
                         if (!error && new_token) {
                           res.status(200).json({
                             success: true,
@@ -100,7 +101,7 @@ router.get('/oauth', async (req, res) => {
                           res.status(500).json({
                             success: false,
                             error: 'Error while Saving the New Token',
-                            additional_error: error,
+                            additional_error: save_error,
                           });
                         }
                       });
@@ -114,7 +115,7 @@ router.get('/oauth', async (req, res) => {
                 });
               }
             } else {
-              let oauth_url = get_auth_code_url(client_id.token);
+              const oauth_url = get_auth_code_url(client_id.token);
               res.redirect(oauth_url);
             }
           } else {
