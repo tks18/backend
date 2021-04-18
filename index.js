@@ -7,9 +7,8 @@ const xss = require('xss-clean');
 const bodyParser = require('body-parser');
 const Path = require('path');
 
-const app = express();
-
 // Express Configs
+const app = express();
 app.use(express.static(Path.join(__dirname, 'public')));
 app.use(express.json({ limit: '50kb' }));
 app.use(bodyParser.urlencoded({ extended: false }));
