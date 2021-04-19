@@ -6,6 +6,8 @@ const mongoSanitize = require('express-mongo-sanitize');
 const xss = require('xss-clean');
 const bodyParser = require('body-parser');
 const Path = require('path');
+const checkOrigin = require('./middleware/checkOrigin');
+const secureTunnel = require('./middleware/secureTunnel');
 
 // Express Configs
 const app = express();
@@ -16,6 +18,8 @@ app.use(bodyParser.json());
 app.use(helmet());
 app.use(mongoSanitize());
 app.use(xss());
+app.use(checkOrigin);
+app.use(secureTunnel);
 
 // Cors
 app.use((req, res, next) => {

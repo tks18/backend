@@ -2,7 +2,6 @@ const express = require('express');
 
 const router = express.Router();
 const path = require('path');
-const originCheck = require('../helpers/checkOrigin');
 const db = require('../helpers/mongo');
 
 router.use('/blog', require('./blog'));
@@ -22,25 +21,18 @@ router.get(/(\/.*)+/, (req, res) => {
 });
 
 router.post('/', (req, res) => {
-  if (originCheck(req.headers.origin)) {
-    db.connect()
-      .then(() => {
-        res.status(200).json({
-          success: true,
-          message: 'Backend and Database Working',
-        });
-        db.close();
-      })
-      .catch((error) => {
-        res.status(500).json({ success: false, message: error });
-        db.close();
+  db.connect()
+    .then(() => {
+      res.status(200).json({
+        success: true,
+        message: 'Backend and Database Working',
       });
-  } else {
-    res.status(401).json({
-      success: false,
-      message: 'Forbidden, Wrong way to Communicate',
+      db.close();
+    })
+    .catch((error) => {
+      res.status(500).json({ success: false, message: error });
+      db.close();
     });
-  }
 });
 
 module.exports = router;

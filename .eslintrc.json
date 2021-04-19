@@ -21,6 +21,8 @@
   "rules": {
     "linebreak-style": "off",
     "arrow-parens": "off",
+    "require-jsdoc": "off",
+    "valid-jsdoc": "off",
     "camelcase": "off",
     "node/no-unsupported-features/es-syntax": "off",
     "space-before-function-paren": "off",
