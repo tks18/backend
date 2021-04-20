@@ -13,8 +13,8 @@ module.exports = (req, res, next) => {
           crypto.enc.Utf8,
         );
         const decryption_valid = !(decrypted === '');
-        const validation_period = current_time + 30000;
         const pre_validation_period = current_time - 30000;
+        const validation_period = current_time + 30000;
         if (decryption_valid) {
           const [, valid_time] = decrypted.split(hash_pass);
           const [decoded_hash] = decrypted.split(valid_time);

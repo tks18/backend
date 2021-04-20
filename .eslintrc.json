@@ -27,6 +27,8 @@
     "node/no-unsupported-features/es-syntax": "off",
     "space-before-function-paren": "off",
     "max-len": "off",
-    "implicit-arrow-linebreak": "off"
+    "implicit-arrow-linebreak": "off",
+    "operator-linebreak": "off",
+    "indent": "off"
   }
 }
