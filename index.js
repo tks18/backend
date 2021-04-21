@@ -25,7 +25,6 @@ app.use(secureTunnel);
 app.use((req, res, next) => {
   const allowedDomains = process.env.FRONT.split(',');
   const { origin } = req.headers;
-  console.log(allowedDomains, origin);
   if (allowedDomains.indexOf(origin) > -1) {
     res.setHeader('Access-Control-Allow-Origin', origin);
   }
