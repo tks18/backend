@@ -1,7 +1,8 @@
 const express = require('express');
+
 const router = express.Router();
 
-//Local
+// Local
 const db = require('../../helpers/mongo');
 const {
   get_auth_code_url,
@@ -9,7 +10,7 @@ const {
   gen_long_token,
 } = require('../../helpers/ig-oauth');
 
-//Model
+// Model
 const Tokens = require('../../models/tokens');
 
 router.get('/oauth', (req, res) => {
@@ -23,19 +24,19 @@ router.get('/oauth', (req, res) => {
         },
         async (error, client_details) => {
           if (!error && client_details) {
-            let client_secret = client_details;
-            let client_id = client_details.additional_tokens.filter((token) => {
-              return token.type == 'client_id';
-            })[0];
+            const client_secret = client_details;
+            const client_id = client_details.additional_tokens.filter(
+              (token) => token.type === 'client_id',
+            )[0];
             if (req.query && req.query.code) {
-              let auth_code = req.query.code;
-              let short_auth_response = await create_access_token(
+              const auth_code = req.query.code;
+              const short_auth_response = await create_access_token(
                 client_id.token,
                 client_secret.token,
                 auth_code,
               );
               if (short_auth_response.success) {
-                let exchange_response = await gen_long_token(
+                const exchange_response = await gen_long_token(
                   client_secret.token,
                   short_auth_response.access_token,
                 );
@@ -46,15 +47,15 @@ router.get('/oauth', (req, res) => {
                       scope: 'profile,media',
                       type: 'access',
                     },
-                    (error, old_access_tokens) => {
+                    (doc_error, old_access_tokens) => {
                       if (
-                        !error &&
+                        !doc_error &&
                         old_access_tokens &&
                         old_access_tokens.length > 0
                       ) {
-                        Tokens.deleteOne(old_access_tokens[0], (error) => {
-                          if (!error) {
-                            let new_token = Tokens({
+                        Tokens.deleteOne(old_access_tokens[0], (del_error) => {
+                          if (!del_error) {
+                            const new_token = Tokens({
                               token: exchange_response.access_token,
                               type: 'access',
                               time: Date.now(),
@@ -62,8 +63,8 @@ router.get('/oauth', (req, res) => {
                               expires_in: Date.now() + 5184000000,
                               scope: 'profile,media',
                             });
-                            new_token.save((error, new_access_token) => {
-                              if (!error && new_access_token) {
+                            new_token.save((save_error, new_access_token) => {
+                              if (!save_error && new_access_token) {
                                 res.status(200).json({
                                   success: true,
                                   message: 'Successfully Saved the token in db',
@@ -84,7 +85,7 @@ router.get('/oauth', (req, res) => {
                           }
                         });
                       } else {
-                        let new_token = Tokens({
+                        const new_token = Tokens({
                           token: exchange_response.access_token,
                           type: 'access',
                           time: Date.now(),
@@ -92,8 +93,8 @@ router.get('/oauth', (req, res) => {
                           expires_in: Date.now() + 5184000000,
                           scope: 'profile,media',
                         });
-                        new_token.save((error, new_access_token) => {
-                          if (!error && new_access_token) {
+                        new_token.save((save_error, new_access_token) => {
+                          if (!save_error && new_access_token) {
                             res.status(200).json({
                               success: true,
                               message: 'Successfully Saved the token in db',
@@ -122,7 +123,7 @@ router.get('/oauth', (req, res) => {
                 });
               }
             } else {
-              let auth_url = get_auth_code_url(client_id.token);
+              const auth_url = get_auth_code_url(client_id.token);
               res.redirect(auth_url);
             }
           } else {

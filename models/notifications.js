@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 
-let notificationSchema = {
+const notificationSchema = {
   start: {
     type: Date,
     default: Date.now,

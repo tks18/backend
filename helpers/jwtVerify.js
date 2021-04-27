@@ -5,11 +5,9 @@ module.exports = (token) => {
     return jwt.verify(token, process.env.HASHPASS, (error, decoded) => {
       if (!error && decoded) {
         return true;
-      } else {
-        return false;
       }
+      return false;
     });
-  } else {
-    return false;
   }
+  return false;
 };

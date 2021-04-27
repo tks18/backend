@@ -5,37 +5,41 @@ const helmet = require('helmet');
 const mongoSanitize = require('express-mongo-sanitize');
 const xss = require('xss-clean');
 const bodyParser = require('body-parser');
-const app = express();
+const Path = require('path');
+const checkOrigin = require('./middleware/checkOrigin');
+const secureTunnel = require('./middleware/secureTunnel');
 
-//Express Configs
-app.use(express.static(__dirname + '/public'));
+// Express Configs
+const app = express();
+app.use(express.static(Path.join(__dirname, 'public')));
 app.use(express.json({ limit: '50kb' }));
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 app.use(helmet());
 app.use(mongoSanitize());
 app.use(xss());
+app.use(checkOrigin);
+app.use(secureTunnel);
 
-//Cors
-app.use(function (req, res, next) {
-  let allowedDomains = process.env.FRONT.split(',');
-  var origin = req.headers.origin;
-  console.log(allowedDomains, origin);
+// Cors
+app.use((req, res, next) => {
+  const allowedDomains = process.env.FRONT.split(',');
+  const { origin } = req.headers;
   if (allowedDomains.indexOf(origin) > -1) {
     res.setHeader('Access-Control-Allow-Origin', origin);
   }
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST');
   res.setHeader(
     'Access-Control-Allow-Headers',
-    'X-Requested-With,content-type, Accept',
+    'X-Requested-With,content-type, Accept,secure_hash,requested_at',
   );
   res.setHeader('Access-Control-Allow-Credentials', true);
   next();
 });
 
-//Routes
+// Routes
 app.use('/', require('./routes/index'));
 
 const PORT = process.env.PORT || 3000;
 
-app.listen(PORT, console.log('Server Started on ' + PORT));
+app.listen(PORT);
