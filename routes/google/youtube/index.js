@@ -18,18 +18,28 @@ const youtube_api_paths = {
 };
 
 router.post('/videos', async (req, res) => {
-  yt_request({
-    url: youtube_api_paths.my_videos.url('snippet', 25),
-    res,
+  // yt_request({
+  //   url: youtube_api_paths.my_videos.url('snippet', 25),
+  //   res,
+  // });
+  res.send({
+    success: false,
+    data: null,
+    error: 'Cannot process Youtube Related Requests Now',
   });
 });
 
 router.post('/channel-data', async (req, res) => {
   const { channel_id } = req.body;
   if (channel_id) {
-    yt_request({
-      url: youtube_api_paths.channel_data.url(channel_id),
-      res,
+    // yt_request({
+    //   url: youtube_api_paths.channel_data.url(channel_id),
+    //   res,
+    // });
+    res.send({
+      success: false,
+      data: null,
+      error: 'Cannot process Youtube Related Requests Now',
     });
   } else {
     res.status(401).json({
