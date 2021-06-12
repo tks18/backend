@@ -199,9 +199,135 @@ const yt_request = (options) => {
                   }
                 });
             } else {
-              const old_access_token = access_tokens[0];
               const current_time = Date.now();
-              if (current_time > old_access_token.expires_in) {
+              const valid_tokens = [];
+              access_tokens.forEach((token) => {
+                if (current_time > token.expires_in) {
+                  Tokens.deleteOne(token, (error) => {
+                    if (!error) {
+                      // eslint-disable-next-line no-console
+                      console.log('Successfully Deleted old Token');
+                    } else {
+                      // eslint-disable-next-line no-console
+                      console.log('Failed Deleting old Token');
+                    }
+                  });
+                } else {
+                  valid_tokens.push(token);
+                }
+              });
+              const tokens_available = valid_tokens.length > 0;
+              const old_access_token = tokens_available
+                ? valid_tokens[0]
+                : null;
+              if (!tokens_available) {
+                Tokens.find({
+                  website: 'google.com',
+                  type: 'refresh',
+                  scope: 'https://www.googleapis.com/auth/youtube.readonly',
+                })
+                  .sort({ time: -1 })
+                  .exec(async (err, refresh_tokens) => {
+                    if (!err && refresh_tokens) {
+                      if (refresh_tokens.length > 0) {
+                        const refresh_token = refresh_tokens[0];
+                        const client_id = refresh_token.additional_tokens.filter(
+                          (tokens) => tokens.type === 'client_id',
+                        )[0];
+                        const client_secret = refresh_token.additional_tokens.filter(
+                          (tokens) => tokens.type === 'client_secret',
+                        )[0];
+                        const token_response = await gen_token(
+                          client_id.token,
+                          client_secret.token,
+                          refresh_token.token,
+                        );
+                        if (token_response.success && !token_response.error) {
+                          const token_integrity = await check_token(
+                            'access_token',
+                            token_response.access_token,
+                          );
+                          if (token_integrity.success) {
+                            const new_access_token = new Tokens({
+                              token: token_response.access_token,
+                              type: 'access',
+                              time: Date.now(),
+                              website: 'google.com',
+                              expires_in: token_response.expires_in,
+                              scope: token_response.scope,
+                            });
+                            new_access_token.save(
+                              async (save_error, access_token) => {
+                                if (!save_error && access_token) {
+                                  axios
+                                    .get(options.url, {
+                                      headers: yt_headers(access_token.token),
+                                    })
+                                    .then((response) => {
+                                      if (
+                                        response.status === 200 &&
+                                        response.data
+                                      ) {
+                                        options.res.status(200).json({
+                                          success: true,
+                                          error: null,
+                                          data: response.data,
+                                        });
+                                      } else {
+                                        options.res.status(500).json({
+                                          success: false,
+                                          error:
+                                            'Error While Fetching Youtube Response',
+                                          data: null,
+                                        });
+                                      }
+                                    })
+                                    .catch((fetch_error) => {
+                                      options.res.status(500).json({
+                                        success: false,
+                                        error: fetch_error,
+                                        data: null,
+                                      });
+                                    });
+                                } else {
+                                  options.res.status(500).json({
+                                    success: false,
+                                    error: 'Error while Saving the New Token',
+                                  });
+                                }
+                              },
+                            );
+                          } else {
+                            options.res.status(500).json({
+                              success: false,
+                              error: 'Access Token Integrity Failed',
+                            });
+                          }
+                        } else {
+                          options.res.status(500).json({
+                            success: false,
+                            error: 'Error While Generating Access Token',
+                          });
+                        }
+                      } else {
+                        options.res.status(500).json({
+                          success: false,
+                          error:
+                            "Couldn't Find Refresh Token to Generate Access Token",
+                        });
+                      }
+                    } else {
+                      options.res.status(500).json({
+                        success: false,
+                        error:
+                          "Couldn't Find Refresh Token to Generate Access Token",
+                      });
+                    }
+                  });
+              } else if (
+                tokens_available &&
+                current_time > old_access_token.expires_in
+              ) {
                 Tokens.deleteOne(old_access_token, (error) => {
                   if (!error) {
                     Tokens.find({
