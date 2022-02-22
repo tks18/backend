@@ -50,13 +50,11 @@ router.post('/get', (req, res) => {
             error,
             message: 'Error While getting Details. Server Error',
           });
-          db.close();
         }
       });
     })
     .catch((error) => {
       res.status(500).json({ success: false, message: error });
-      db.close();
     });
 });
 
@@ -79,14 +77,12 @@ router.post('/set', jwtverify, (req, res) => {
               doc,
               message: 'Successfully saved the Tip Details',
             });
-            db.close();
           } else {
             res.status(500).json({
               success: false,
               error,
               message: 'Error While Saving Details. Validation Failed',
             });
-            db.close();
           }
         });
       } else {
@@ -94,12 +90,10 @@ router.post('/set', jwtverify, (req, res) => {
           success: false,
           message: 'Required Details Not Sent',
         });
-        db.close();
       }
     })
     .catch((error) => {
       res.status(500).json({ success: false, message: error });
-      db.close();
     });
 });
 

@@ -27,11 +27,9 @@ router.post('/', (req, res) => {
         success: true,
         message: 'Backend and Database Working',
       });
-      db.close();
     })
     .catch((error) => {
       res.status(500).json({ success: false, message: error });
-      db.close();
     });
 });
 

@@ -23,7 +23,6 @@ router.post('/get', (req, res) => {
               error,
             });
           }
-          db.close();
         });
       } else {
         Blog.find({}, (error, posts) => {
@@ -36,13 +35,11 @@ router.post('/get', (req, res) => {
               error,
             });
           }
-          db.close();
         });
       }
     })
     .catch((error) => {
       res.status(500).json({ success: false, message: error });
-      db.close();
     });
 });
 
@@ -63,19 +60,16 @@ router.post('/set', jwtverify, (req, res) => {
           } else {
             res.status(500).json({ success: false, message: error });
           }
-          db.close();
         });
       } else {
         res.status(404).json({
           success: false,
           message: 'Post Validation Failed',
         });
-        db.close();
       }
     })
     .catch((error) => {
       res.status(500).json({ success: false, message: error });
-      db.close();
     });
 });
 
@@ -103,7 +97,6 @@ router.post('/update', jwtverify, (req, res) => {
                       save_error,
                     });
                   }
-                  db.close();
                 });
               } else {
                 res.status(500).json({
@@ -111,7 +104,6 @@ router.post('/update', jwtverify, (req, res) => {
                   message: 'Failed to get Post',
                   del_error,
                 });
-                db.close();
               }
             });
           } else {
@@ -120,7 +112,6 @@ router.post('/update', jwtverify, (req, res) => {
               message: 'No Post Found to Update',
               doc_error,
             });
-            db.close();
           }
         });
       } else {
@@ -128,12 +119,10 @@ router.post('/update', jwtverify, (req, res) => {
           success: false,
           message: 'No Post Found to Update',
         });
-        db.close();
       }
     })
     .catch((error) => {
       res.status(500).json({ success: false, message: error });
-      db.close();
     });
 });
 
@@ -157,7 +146,6 @@ router.post('/delete', jwtverify, (req, res) => {
                   del_error,
                 });
               }
-              db.close();
             });
           } else {
             res.status(404).json({
@@ -172,12 +160,10 @@ router.post('/delete', jwtverify, (req, res) => {
           success: false,
           message: 'No ID Found in Your Reqs',
         });
-        db.close();
       }
     })
     .catch((error) => {
       res.status(500).json({ success: false, message: error });
-      db.close();
     });
 });
 

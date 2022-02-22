@@ -7,6 +7,7 @@ module.exports = {
         useUnifiedTopology: true,
         bufferCommands: false,
         bufferMaxEntries: 0,
+        maxPoolSize: 30,
         useNewUrlParser: true,
         useCreateIndex: true,
       })
