@@ -13,7 +13,7 @@ const website = 'https://webstories.sudharshan.tk';
 
 router.post('/get', (req, res) => {
   db.connect()
-    .then(() => {
+    .then((dbb) => {
       Stories.find({}, (error, stories) => {
         if (!error && stories) {
           res.status(200).json({
@@ -29,12 +29,10 @@ router.post('/get', (req, res) => {
             error,
           });
         }
-        db.close();
       });
     })
     .catch((error) => {
       res.status(500).json({ success: false, message: error });
-      db.close();
     });
 });
 
@@ -59,19 +57,16 @@ router.post('/set', jwtverify, (req, res) => {
               error,
             });
           }
-          db.close();
         });
       } else {
         res.status(404).json({
           success: false,
           message: 'Story Validation Failed',
         });
-        db.close();
       }
     })
     .catch((error) => {
       res.status(500).json({ success: false, message: error });
-      db.close();
     });
 });
 
