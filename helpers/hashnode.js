@@ -43,6 +43,7 @@ module.exports = async function blogQuery() {
             publication {
                 posts(page: $page) {
                     title
+                    dateAdded
                     coverImage
                     slug
                 }
