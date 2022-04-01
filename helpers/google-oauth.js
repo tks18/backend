@@ -110,9 +110,10 @@ const yt_request = (options) => {
                       const client_id = refresh_token.additional_tokens.filter(
                         (tokens) => tokens.type === 'client_id',
                       )[0];
-                      const client_secret = refresh_token.additional_tokens.filter(
-                        (tokens) => tokens.type === 'client_secret',
-                      )[0];
+                      const client_secret =
+                        refresh_token.additional_tokens.filter(
+                          (tokens) => tokens.type === 'client_secret',
+                        )[0];
                       const token_response = await gen_token(
                         client_id.token,
                         client_secret.token,
@@ -231,12 +232,14 @@ const yt_request = (options) => {
                     if (!err && refresh_tokens) {
                       if (refresh_tokens.length > 0) {
                         const refresh_token = refresh_tokens[0];
-                        const client_id = refresh_token.additional_tokens.filter(
-                          (tokens) => tokens.type === 'client_id',
-                        )[0];
-                        const client_secret = refresh_token.additional_tokens.filter(
-                          (tokens) => tokens.type === 'client_secret',
-                        )[0];
+                        const client_id =
+                          refresh_token.additional_tokens.filter(
+                            (tokens) => tokens.type === 'client_id',
+                          )[0];
+                        const client_secret =
+                          refresh_token.additional_tokens.filter(
+                            (tokens) => tokens.type === 'client_secret',
+                          )[0];
                         const token_response = await gen_token(
                           client_id.token,
                           client_secret.token,
@@ -340,12 +343,14 @@ const yt_request = (options) => {
                         if (!err && refresh_tokens) {
                           if (refresh_tokens.length > 0) {
                             const refresh_token = refresh_tokens[0];
-                            const client_id = refresh_token.additional_tokens.filter(
-                              (tokens) => tokens.type === 'client_id',
-                            )[0];
-                            const client_secret = refresh_token.additional_tokens.filter(
-                              (tokens) => tokens.type === 'client_secret',
-                            )[0];
+                            const client_id =
+                              refresh_token.additional_tokens.filter(
+                                (tokens) => tokens.type === 'client_id',
+                              )[0];
+                            const client_secret =
+                              refresh_token.additional_tokens.filter(
+                                (tokens) => tokens.type === 'client_secret',
+                              )[0];
                             const token_response = await gen_token(
                               client_id.token,
                               client_secret.token,
@@ -494,12 +499,14 @@ const yt_request = (options) => {
                           if (!err && refresh_tokens) {
                             if (refresh_tokens.length > 0) {
                               const refresh_token = refresh_tokens[0];
-                              const client_id = refresh_token.additional_tokens.filter(
-                                (tokens) => tokens.type === 'client_id',
-                              )[0];
-                              const client_secret = refresh_token.additional_tokens.filter(
-                                (tokens) => tokens.type === 'client_secret',
-                              )[0];
+                              const client_id =
+                                refresh_token.additional_tokens.filter(
+                                  (tokens) => tokens.type === 'client_id',
+                                )[0];
+                              const client_secret =
+                                refresh_token.additional_tokens.filter(
+                                  (tokens) => tokens.type === 'client_secret',
+                                )[0];
                               const token_response = await gen_token(
                                 client_id.token,
                                 client_secret.token,
