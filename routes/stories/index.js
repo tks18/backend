@@ -9,7 +9,7 @@ const jwtverify = require('../../middleware/jwtverify');
 // Models
 const Stories = require('../../models/stories');
 
-const website = 'https://webstories.sudharshan.tk';
+const website = 'https://webstories.sudharshan.dev';
 
 router.post('/get', (req, res) => {
   db.connect()
